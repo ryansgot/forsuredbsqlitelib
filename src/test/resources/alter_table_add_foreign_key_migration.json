@@ -1,0 +1,17 @@
+[
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "ADD_FOREIGN_KEY_REFERENCE",
+    "foreign_key_info" : {
+      "foreign_key_table": "user",
+      "foreign_key_column" : "_id"
+    },
+    "column_info" : {
+      "column_name" : "user_id",
+      "column_type" : "long"
+    }
+  }
+]

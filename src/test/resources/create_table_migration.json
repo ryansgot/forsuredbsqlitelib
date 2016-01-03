@@ -1,0 +1,9 @@
+[
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "CREATE_TABLE"
+  }
+]

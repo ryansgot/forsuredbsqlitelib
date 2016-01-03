@@ -1,0 +1,99 @@
+[
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "CREATE_TABLE"
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "CREATE_TABLE"
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "global_id",
+      "column_type" : "long"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "app_rating",
+      "column_type" : "double"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "competitor_app_rating",
+      "column_type" : "java.math.BigDecimal"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "email_address",
+      "column_type" : "java.lang.String"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "binary_data",
+      "column_type" : "byte[]"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "login_count",
+      "column_type" : "java.int.BigDecimal"
+    }
+  },
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "profile_info"
+    },
+    "migration_type" : "ADD_FOREIGN_KEY_REFERENCE",
+    "foreign_key" : {
+      "update_action" : "CASCADE",
+      "delete_action" : "CASCADE",
+      "foreign_table_name" : "user",
+      "foreign_column_name" : "_id"
+    },
+    "column_info" : {
+      "column_name" : "user_id",
+      "column_type" : "long"
+    }
+  }
+]

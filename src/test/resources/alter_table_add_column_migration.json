@@ -1,0 +1,13 @@
+[
+  {
+    "db_version" : 1,
+    "table_info" : {
+      "table_name" : "user"
+    },
+    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
+    "column_info" : {
+      "column_name" : "global_id",
+      "column_type" : "long"
+    }
+  }
+]
