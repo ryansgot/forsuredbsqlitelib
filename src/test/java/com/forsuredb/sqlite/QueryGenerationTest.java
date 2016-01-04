@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.forsuredb.sqlite.TestData.resourceText;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -37,18 +38,18 @@ public class QueryGenerationTest {
         return Arrays.asList(new Object[][] {
                 // ALTER TABLE ADD COLUMN
                 {
-                        TestData.resourceText("alter_table_add_column_migration.json"),
+                        resourceText("alter_table_add_column_migration.json"),
                         Lists.newArrayList("ALTER TABLE user ADD COLUMN global_id INTEGER;")
                 },
                 // CREATE TABLE
                 {
-                        TestData.resourceText("create_table_migration.json"),
+                        resourceText("create_table_migration.json"),
                         Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, modified DATETIME DEFAULT CURRENT_TIMESTAMP);",
                                            "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;")
                 },
                 // ADD FOREIGN KEY
                 {
-                        TestData.resourceText("alter_table_add_foreign_key_migration.json"),
+                        resourceText("alter_table_add_foreign_key_migration.json"),
                         Lists.newArrayList("DROP TABLE IF EXISTS temp_profile_info;",
                                 "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, binary_data, email_address FROM profile_info;",
                                 "DROP TABLE IF EXISTS profile_info;",
@@ -74,7 +75,9 @@ public class QueryGenerationTest {
 
     @Test
     public void shouldMatchExpectedSqlExactly() {
-        assertArrayEquals(expectedSqlOutput.toArray(new String[expectedSqlOutput.size()]), actualSqlOutput.toArray(new String[actualSqlOutput.size()]));
+        final String[] expectedSql = expectedSqlOutput.toArray(new String[expectedSqlOutput.size()]);
+        final String[] actualSql = actualSqlOutput.toArray(new String[actualSqlOutput.size()]);
+        assertArrayEquals(expectedSql, actualSql);
     }
 
     private List<String> generateOutputSql() {
