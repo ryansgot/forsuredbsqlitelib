@@ -17,11 +17,8 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.MigrationSet;
-import com.forsuredb.migration.QueryGenerator;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -30,12 +27,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.forsuredb.sqlite.TestData.resourceText;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
