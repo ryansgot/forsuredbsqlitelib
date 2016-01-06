@@ -1,5 +1,5 @@
 /*
-   forsuredb, an object relational mapping tool
+   forsuredbsqlitelib, sqlite library for the forsuredb project
 
    Copyright 2015 Ryan Scott
 

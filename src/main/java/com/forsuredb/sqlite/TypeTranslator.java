@@ -1,5 +1,5 @@
 /*
-   forsuredbsqlite, a query generator for forsuredb
+   forsuredbsqlitelib, sqlite library for the forsuredb project
 
    Copyright 2015 Ryan Scott
 
