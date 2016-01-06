@@ -17,7 +17,8 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.annotationprocessor.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
 import java.util.LinkedList;
@@ -28,7 +29,7 @@ public class AddUniqueIndexGenerator extends QueryGenerator {
     private final ColumnInfo column;
 
     public AddUniqueIndexGenerator(String tableName, ColumnInfo column) {
-        super(tableName, MigrationType.ADD_UNIQUE_INDEX);
+        super(tableName, Migration.Type.ADD_UNIQUE_INDEX);
         this.column = column;
     }
 

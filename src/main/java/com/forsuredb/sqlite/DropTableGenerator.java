@@ -17,6 +17,7 @@
  */
 package com.forsuredb.sqlite;
 
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
 import java.util.LinkedList;
@@ -25,7 +26,7 @@ import java.util.List;
 public class DropTableGenerator extends QueryGenerator {
 
     public DropTableGenerator(String tableName) {
-        super(tableName, MigrationType.DROP_TABLE);
+        super(tableName, Migration.Type.DROP_TABLE);
     }
 
     @Override

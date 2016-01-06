@@ -1,13 +1,56 @@
-[
-  {
-    "db_version" : 1,
-    "table_info" : {
-      "table_name" : "user"
-    },
-    "migration_type" : "ALTER_TABLE_ADD_COLUMN",
-    "column_info" : {
-      "column_name" : "global_id",
-      "column_type" : "long"
+{
+  "ordered_migrations": [{
+    "table_name": "user",
+    "column_name": "global_id",
+    "migration_type": "ALTER_TABLE_ADD_COLUMN"
+  }],
+  "target_schema": {
+    "user": {
+      "column_info_map": {
+        "deleted": {
+          "method_name": "deleted",
+          "column_name": "deleted",
+          "column_type": "boolean",
+          "default_value": "0",
+          "unique": false,
+          "primary_key": false
+        },
+        "created": {
+          "method_name": "created",
+          "column_name": "created",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "primary_key": false
+        },
+        "global_id": {
+          "method_name": "globalId",
+          "column_name": "global_id",
+          "column_type": "long",
+          "unique": false,
+          "primary_key": false
+        },
+        "modified": {
+          "method_name": "modified",
+          "column_name": "modified",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "primary_key": false
+        },
+        "_id": {
+          "method_name": "id",
+          "column_name": "_id",
+          "column_type": "long",
+          "unique": false,
+          "primary_key": true
+        }
+      },
+      "table_name": "user",
+      "qualified_class_name": "com.forsuredb.testapp.model.UserTable",
+      "static_data_asset": "user.xml",
+      "static_data_record_name": "user"
     }
-  }
-]
+  },
+  "db_version": 1
+}

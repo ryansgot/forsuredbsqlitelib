@@ -17,15 +17,14 @@
  */
 package com.forsuredb.sqlite;
 
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
-import com.forsuredb.annotationprocessor.ColumnInfo;
-import com.forsuredb.annotationprocessor.TableInfo;
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.TableInfo;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class AddForeignKeyGenerator extends QueryGenerator {
 
@@ -33,7 +32,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
     private final ColumnInfo column;
 
     public AddForeignKeyGenerator(TableInfo table, ColumnInfo column) {
-        super(table.getTableName(), MigrationType.ADD_FOREIGN_KEY_REFERENCE);
+        super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
         this.column = column;
     }
@@ -50,18 +49,6 @@ public class AddForeignKeyGenerator extends QueryGenerator {
         retList.addAll(new DropTableGenerator(tempTableName()).generate());
 
         return retList;
-    }
-
-    @Override
-    public Map<String, String> getAdditionalAttributes() {
-        Map<String, String> ret = new HashMap<>();
-        ret.put("column", column.getColumnName());
-        ret.put("column_type", column.getQualifiedType());
-        ret.put("foreign_key_table", column.getForeignKeyInfo().getTableName());
-        ret.put("foreign_key_column", column.getForeignKeyInfo().getColumnName());
-        ret.put("foreign_key_delete_action", column.getForeignKeyInfo().getDeleteAction().toString());
-        ret.put("foreign_key_update_action", column.getForeignKeyInfo().getUpdateAction().toString());
-        return ret;
     }
 
     private List<String> recreateTableWithAllForeignKeysQuery() {

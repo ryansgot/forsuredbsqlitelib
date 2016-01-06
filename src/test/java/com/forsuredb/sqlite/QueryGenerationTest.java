@@ -1,6 +1,7 @@
 package com.forsuredb.sqlite;
 
 import com.forsuredb.migration.Migration;
+import com.forsuredb.migration.MigrationSet;
 import com.forsuredb.migration.QueryGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
@@ -65,7 +66,8 @@ public class QueryGenerationTest {
 
     @Before
     public void setUp() {
-        actualSqlOutput = generateOutputSql();
+        MigrationSet migrationSet = new Gson().fromJson(inputMigrationJson, MigrationSet.class);
+        actualSqlOutput = new SqlGenerator(migrationSet).generate();
     }
 
     @Test
@@ -75,17 +77,8 @@ public class QueryGenerationTest {
 
     @Test
     public void shouldMatchExpectedSqlExactly() {
-        final String[] expectedSql = expectedSqlOutput.toArray(new String[expectedSqlOutput.size()]);
-        final String[] actualSql = actualSqlOutput.toArray(new String[actualSqlOutput.size()]);
-        assertArrayEquals(expectedSql, actualSql);
-    }
-
-    private List<String> generateOutputSql() {
-        List<Migration> migrations = new Gson().fromJson(inputMigrationJson, new TypeToken<List<Migration>>() {}.getType());
-        List<String> retList = new ArrayList<>();
-        for (Migration migration : migrations) {
-            retList.addAll(QueryGeneratorFactory.getFor(migration).generate());
+        for (int i = 0; i < expectedSqlOutput.size(); i++) {
+            assertEquals("sql index: " + i, expectedSqlOutput.get(i), actualSqlOutput.get(i));
         }
-        return retList;
     }
 }

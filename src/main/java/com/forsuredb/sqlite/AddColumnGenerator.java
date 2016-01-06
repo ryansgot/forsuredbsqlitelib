@@ -17,29 +17,20 @@
  */
 package com.forsuredb.sqlite;
 
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
-import com.forsuredb.annotationprocessor.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class AddColumnGenerator extends QueryGenerator {
 
     private final ColumnInfo column;
 
     public AddColumnGenerator(String tableName, ColumnInfo column) {
-        super(tableName, MigrationType.ALTER_TABLE_ADD_COLUMN);
+        super(tableName, Migration.Type.ALTER_TABLE_ADD_COLUMN);
         this.column = column;
-    }
-
-    @Override
-    public Map<String, String> getAdditionalAttributes() {
-        Map<String, String> ret = new HashMap<>();
-        ret.put("column", column.getColumnName());
-        ret.put("column_type", column.getQualifiedType());
-        return ret;
     }
 
     @Override

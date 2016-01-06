@@ -18,10 +18,10 @@
 package com.forsuredb.sqlite;
 
 import com.forsuredb.annotation.ForeignKey;
-import com.forsuredb.annotationprocessor.ColumnInfo;
-import com.forsuredb.annotationprocessor.ForeignKeyInfo;
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.ForeignKeyInfo;
 import com.forsuredb.annotationprocessor.TableContext;
-import com.forsuredb.annotationprocessor.TableInfo;
+import com.forsuredb.annotationprocessor.info.TableInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,7 +34,6 @@ import java.util.Map;
 public class TestData {
 
     public static final String TEST_RES = "src" + File.separator + "test" + File.separator + "resources";
-    public static final ColumnInfo[] DEFAULT_COLUMNS = new ColumnInfo[] {TestData.idCol(), createdCol(), deletedCol(), modifiedCol()};
 
     // Convenience constants
     public static final String TABLE_NAME = "test_table";
@@ -192,6 +191,11 @@ public class TestData {
                 @Override
                 public Collection<TableInfo> allTables() {
                     return tableMap.values();
+                }
+
+                @Override
+                public Map<String, TableInfo> tableMap() {
+                    return tableMap;
                 }
             };
         }

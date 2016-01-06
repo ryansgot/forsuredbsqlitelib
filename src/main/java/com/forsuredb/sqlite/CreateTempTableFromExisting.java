@@ -17,8 +17,9 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.annotationprocessor.ColumnInfo;
-import com.forsuredb.annotationprocessor.TableInfo;
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.TableInfo;
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class CreateTempTableFromExisting extends QueryGenerator {
     private final Map<String, ColumnInfo> excludedColumnsMap = new HashMap<>();
 
     public CreateTempTableFromExisting(TableInfo table, ColumnInfo... excludedColumns) {
-        super(table.getTableName(), MigrationType.ADD_FOREIGN_KEY_REFERENCE);
+        super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
         for (ColumnInfo column : excludedColumns) {
             this.excludedColumnsMap.put(column.getColumnName(), column);

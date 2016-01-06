@@ -17,68 +17,49 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.annotationprocessor.ColumnInfo;
-import com.forsuredb.annotationprocessor.TableInfo;
+import com.forsuredb.annotationprocessor.info.TableInfo;
 import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class QueryGeneratorFactory {
 
-    public static QueryGenerator createForTable(TableInfo table) {
-        return new CreateTableGenerator(table.getTableName());
-    }
-
-    public static QueryGenerator createForNewColumn(TableInfo table, ColumnInfo column) {
-        if (column.isForeignKey()) {
-            return new AddForeignKeyGenerator(table, column);
+    private static final QueryGenerator emptyGenerator = new QueryGenerator("empty", Migration.Type.DROP_TABLE) {
+        @Override
+        public List<String> generate() {
+            return new ArrayList<>();
         }
-        if (column.isUnique()) {
-            return new AddUniqueColumnGenerator(table.getTableName(), column);
-        }
-        return new AddColumnGenerator(table.getTableName(), column);
-    }
+    };
 
-    public static QueryGenerator createForExistingColumn(String tableName, ColumnInfo existingColumn, ColumnInfo targetColumn) {
-        if (targetColumn.isUnique() && !existingColumn.isUnique()) {
-            return new AddUniqueIndexGenerator(tableName, targetColumn);
-        }
-        return null;
-    }
-
-    public static QueryGenerator getFor(Migration migration) {
+    public static QueryGenerator getFor(Migration migration, Map<String, TableInfo> targetContext) {
         // Guards against null pointer exception by passing back a query generator that does nothing
-        if (migration == null || migration.getMigrationType() == null) {
-            return new QueryGenerator("", QueryGenerator.MigrationType.DROP_TABLE) {
-                @Override
-                public List<String> generate() {
-                    return new ArrayList<>();
-                }
-            };
+        if (migration == null || migration.getType() == null) {
+            return emptyGenerator;
         }
 
-        switch (migration.getMigrationType()) {
+        TableInfo table = targetContext.get(migration.getTableName());
+        if (table == null) {
+            return emptyGenerator;
+        }
+
+        switch (migration.getType()) {
             case CREATE_TABLE:
-                return new CreateTableGenerator(migration.getTableInfo().getTableName());
+                return new CreateTableGenerator(table.getTableName());
             case ADD_FOREIGN_KEY_REFERENCE:
-                return new AddForeignKeyGenerator(migration.getTableInfo(), migration.getColumnInfo());
+                return new AddForeignKeyGenerator(table, table.getColumn(migration.getColumnName()));
             case ALTER_TABLE_ADD_UNIQUE:
-                return new AddUniqueColumnGenerator(migration.getTableInfo().getTableName(), migration.getColumnInfo());
+                return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ADD_UNIQUE_INDEX:
-                return new AddUniqueIndexGenerator(migration.getTableInfo().getTableName(), migration.getColumnInfo());
+                return new AddUniqueIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case DROP_TABLE:
-                return new DropTableGenerator(migration.getTableInfo().getTableName());
+                return new DropTableGenerator(table.getTableName());
             case ALTER_TABLE_ADD_COLUMN:
-                return new AddColumnGenerator(migration.getTableInfo().getTableName(), migration.getColumnInfo());
+                return new AddColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
         }
 
-        return new QueryGenerator("", QueryGenerator.MigrationType.DROP_TABLE) {
-            @Override
-            public List<String> generate() {
-                return new ArrayList<>();
-            }
-        };
+        return emptyGenerator;
     }
 }

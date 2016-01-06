@@ -17,6 +17,7 @@
  */
 package com.forsuredb.sqlite;
 
+import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
 import java.util.HashMap;
@@ -27,15 +28,7 @@ import java.util.Map;
 public class CreateTableGenerator extends QueryGenerator {
 
     public CreateTableGenerator(String tableName) {
-        super(tableName,MigrationType.CREATE_TABLE);
-    }
-
-    @Override
-    public Map<String, String> getAdditionalAttributes() {
-        Map<String, String> ret = new HashMap<>();
-        ret.put("column", "_id");
-        ret.put("column_type", "long");
-        return ret;
+        super(tableName, Migration.Type.CREATE_TABLE);
     }
 
     @Override
