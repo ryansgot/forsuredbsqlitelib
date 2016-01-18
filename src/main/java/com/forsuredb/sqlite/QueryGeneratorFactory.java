@@ -41,8 +41,8 @@ public class QueryGeneratorFactory {
         }
 
         TableInfo table = targetContext.get(migration.getTableName());
-        if (table == null) {
-            return emptyGenerator;
+        if (migration.getType() != Migration.Type.DROP_TABLE && table == null) {
+            return emptyGenerator;  // <-- the target context will not have the table if it is about to be dropped
         }
 
         switch (migration.getType()) {
@@ -54,10 +54,10 @@ public class QueryGeneratorFactory {
                 return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ADD_UNIQUE_INDEX:
                 return new AddUniqueIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
-            case DROP_TABLE:
-                return new DropTableGenerator(table.getTableName());
             case ALTER_TABLE_ADD_COLUMN:
                 return new AddColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
+            case DROP_TABLE:
+                return new DropTableGenerator(migration.getTableName());
         }
 
         return emptyGenerator;
