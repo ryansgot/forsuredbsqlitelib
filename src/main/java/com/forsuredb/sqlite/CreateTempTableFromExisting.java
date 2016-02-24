@@ -33,6 +33,10 @@ public class CreateTempTableFromExisting extends QueryGenerator {
     private final TableInfo table;
     private final Map<String, ColumnInfo> excludedColumnsMap = new HashMap<>();
 
+    public CreateTempTableFromExisting(TableInfo table, List<ColumnInfo> excludedColumns) {
+        this(table, excludedColumns.toArray(new ColumnInfo[excludedColumns.size()]));
+    }
+
     public CreateTempTableFromExisting(TableInfo table, ColumnInfo... excludedColumns) {
         super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;

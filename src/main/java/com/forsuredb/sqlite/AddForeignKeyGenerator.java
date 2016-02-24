@@ -21,6 +21,7 @@ import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 import com.forsuredb.annotationprocessor.info.ColumnInfo;
 import com.forsuredb.annotationprocessor.info.TableInfo;
+import com.google.common.collect.Lists;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,19 +30,37 @@ import java.util.List;
 public class AddForeignKeyGenerator extends QueryGenerator {
 
     private final TableInfo table;
-    private final ColumnInfo column;
+    private final List<ColumnInfo> newForeignKeyColumns;
 
+    /**
+     * <p>
+     *     Add only one foreign key column to the table
+     * </p>
+     * @param table the table to which foreign key columns should be added
+     * @param column the foreign key column to add
+     */
     public AddForeignKeyGenerator(TableInfo table, ColumnInfo column) {
+        this(table, Lists.newArrayList(column));
+    }
+
+    /**
+     * <p>
+     *     Use this when there are multiple foreign keys to add to the same table
+     * </p>
+     * @param table the table to which foreign key columns should be added
+     * @param newForeignKeyColumns a list of all new foreign key columns to add
+     */
+    public AddForeignKeyGenerator(TableInfo table, List<ColumnInfo> newForeignKeyColumns) {
         super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
-        this.column = column;
+        this.newForeignKeyColumns = newForeignKeyColumns;
     }
 
     @Override
     public List<String> generate() {
         List<String> retList = new LinkedList<>();
 
-        retList.addAll(new CreateTempTableFromExisting(table, column).generate());
+        retList.addAll(new CreateTempTableFromExisting(table, newForeignKeyColumns).generate());
         retList.addAll(new DropTableGenerator(getTableName()).generate());
         retList.addAll(recreateTableWithAllForeignKeysQuery());
         retList.addAll(allColumnAdditionQueries());
@@ -60,9 +79,13 @@ public class AddForeignKeyGenerator extends QueryGenerator {
         buf.delete(buf.length() - 2, buf.length());   // <-- removes );
         List<ColumnInfo> foreignKeyColumns = table.getForeignKeyColumns();
         addColumnDefinitionsToBuffer(buf, foreignKeyColumns);
-        addColumnDefinitionToBuffer(buf, column);
+        for (ColumnInfo fKeyColumn : newForeignKeyColumns) {
+            addColumnDefinitionToBuffer(buf, fKeyColumn);
+        }
         addForeignKeyDefinitionsToBuffer(buf, foreignKeyColumns);
-        addForeignKeyDefinitionToBuffer(buf, column);
+        for (ColumnInfo fKeyColumn : newForeignKeyColumns) {
+            addForeignKeyDefinitionToBuffer(buf, fKeyColumn);
+        }
         retList.add(buf.append(");").toString());
 
         // add all remaining table create queries
@@ -92,8 +115,8 @@ public class AddForeignKeyGenerator extends QueryGenerator {
         Collections.sort(tableColumns);
         // append all of the previously existing columns first
         for (ColumnInfo tableColumn : tableColumns) {
-            if (tableColumn.getColumnName().equals(column.getColumnName())) {
-                buf.append(", null AS ").append(column.getColumnName());
+            if (newForeignKeyColumns.contains(tableColumn)) {
+                buf.append(", null AS ").append(tableColumn.getColumnName());
             } else {
                 buf.append("_id".equals(tableColumn.getColumnName()) ? "" : ", ").append(tableColumn.getColumnName());
             }
@@ -108,7 +131,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private void addColumnDefinitionsToBuffer(StringBuffer buf, List<ColumnInfo> columns) {
         for (ColumnInfo column : columns) {
-            if (!column.getColumnName().equals(this.column.getColumnName())) {
+            if (!newForeignKeyColumns.contains(column)) {
                 addColumnDefinitionToBuffer(buf, column);
             }
         }
@@ -121,7 +144,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private void addForeignKeyDefinitionsToBuffer(StringBuffer buf, List<ColumnInfo> columns) {
         for (ColumnInfo column : columns) {
-            if (!column.getColumnName().equals(this.column.getColumnName())) {
+            if (!newForeignKeyColumns.contains(column)) {
                 addForeignKeyDefinitionToBuffer(buf, column);
             }
         }

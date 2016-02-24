@@ -26,9 +26,11 @@ import com.forsuredb.migration.MigrationSet;
 public class SqlGenerator {
 
     private final MigrationSet migrationSet;
+    private final QueryGeneratorFactory queryGeneratorFactory;
 
     public SqlGenerator(MigrationSet migrationSet) {
         this.migrationSet = migrationSet;
+        queryGeneratorFactory = new QueryGeneratorFactory(migrationSet);
     }
 
     public List<String> generate() {
@@ -38,7 +40,7 @@ public class SqlGenerator {
 
         List<String> sqlList = new ArrayList<>();
         for (Migration m : migrationSet.getOrderedMigrations()) {
-            sqlList.addAll(QueryGeneratorFactory.getFor(m, migrationSet.getTargetSchema()).generate());
+            sqlList.addAll(queryGeneratorFactory.getFor(m, migrationSet.getTargetSchema()).generate());
         }
 
         return sqlList;

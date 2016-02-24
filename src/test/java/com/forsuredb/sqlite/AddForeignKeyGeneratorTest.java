@@ -22,11 +22,13 @@ import com.forsuredb.annotationprocessor.info.ColumnInfo;
 import com.forsuredb.annotationprocessor.info.TableInfo;
 import com.forsuredb.migration.QueryGenerator;
 
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.forsuredb.sqlite.TestData.*;
 
@@ -36,25 +38,24 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
     private AddForeignKeyGenerator generatorUnderTest;
 
     private TableInfo table;
-    private ColumnInfo column;
+    private List<ColumnInfo> newForeignKeyColumns;
 
-    public AddForeignKeyGeneratorTest(TableInfo table, ColumnInfo column, String... expectedSql) {
+    public AddForeignKeyGeneratorTest(TableInfo table, List<ColumnInfo> newForeignKeyColumns, String... expectedSql) {
         super (expectedSql);
         this.table = table;
-        this.column = column;
+        this.newForeignKeyColumns = newForeignKeyColumns;
     }
 
     @Parameterized.Parameters
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                // Add a foreign key to a basic table with no extra columns
-                {
+                {   // 0 Add a foreign key to a basic table with no extra columns
                         table().columnMap(columnMapOf(longCol()
                                         .foreignKeyInfo(cascadeFKI("user")
                                                 .build())
                                         .build()))
                                 .build(),
-                        longCol().foreignKeyInfo(cascadeFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(cascadeFKI("user").build()).build()),
                         new String[] {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified FROM " + TABLE_NAME + ";",
@@ -65,14 +66,13 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key to a basic table with one extra non-foreign key column
-                {
+                {   // 1 Add a foreign key to a basic table with one extra non-foreign key column
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user")
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(cascadeFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(cascadeFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -84,14 +84,13 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key with NO_ACTION as its delete and update action
-                {
+                {   // 2 Add a foreign key with NO_ACTION as its delete and update action
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(noActionFKI("user")
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(noActionFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(noActionFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -103,14 +102,13 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key with RESTRICT as its delete and update action
-                {
+                {   // 3 Add a foreign key with RESTRICT as its delete and update action
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(restrictFKI("user")
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(restrictFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(restrictFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -122,14 +120,13 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key with SET_NULL as its delete and update action
-                {
+                {   // 4 Add a foreign key with SET_NULL as its delete and update action
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(setNullFKI("user")
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(setNullFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(setNullFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -141,14 +138,13 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key with SET_DEFAULT as its delete and update action
-                {
+                {   // 5 Add a foreign key with SET_DEFAULT as its delete and update action
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(setDefaultFKI("user")
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(setDefaultFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(setDefaultFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -160,15 +156,14 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key with SET_DEFAULT as its delete action and SET_NULL as its update action
-                {
+                {   // 6 Add a foreign key with SET_DEFAULT as its delete action and SET_NULL as its update action
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(setDefaultFKI("user")
                                                 .updateAction(ForeignKey.ChangeAction.SET_NULL)
                                                 .build())
                                         .build(),
                                         intCol().build()))
                                 .build(),
-                        longCol().foreignKeyInfo(setDefaultFKI("user").updateAction(ForeignKey.ChangeAction.SET_NULL).build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(setDefaultFKI("user").updateAction(ForeignKey.ChangeAction.SET_NULL).build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
@@ -180,19 +175,35 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
                         }
                 },
-                // Add a foreign key to a basic table with one extra foreign key
-                {
+                {   // 7 Add a foreign key to a basic table with one extra foreign key
                         table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user")
-                                                .build())
+                                        .build())
                                         .build(),
-                                        intCol().foreignKeyInfo(cascadeFKI("profile_info").build()).build()))
+                                intCol().foreignKeyInfo(cascadeFKI("profile_info").build()).build()))
                                 .build(),
-                        longCol().foreignKeyInfo(cascadeFKI("user").build()).build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(cascadeFKI("user").build()).build()),
                         new String[]{
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
                                 "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
                                 "DROP TABLE IF EXISTS " + TABLE_NAME + ";",
                                 "CREATE TABLE " + TABLE_NAME + "(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, modified DATETIME DEFAULT CURRENT_TIMESTAMP, int_column INTEGER, long_column INTEGER, FOREIGN KEY(int_column) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE, FOREIGN KEY(long_column) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TRIGGER " + TABLE_NAME + "_updated_trigger AFTER UPDATE ON " + TABLE_NAME + " BEGIN UPDATE " + TABLE_NAME + " SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;",
+                                "INSERT INTO " + TABLE_NAME + " SELECT _id, created, deleted, modified, int_column, null AS long_column FROM temp_" + TABLE_NAME + ";",
+                                "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
+                        }
+                },
+                {   // 8 Add more than one foreign key at a time
+                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user")
+                                        .build())
+                                        .build(),
+                                intCol().foreignKeyInfo(cascadeFKI("profile_info").build()).build()))
+                                .build(),
+                        Lists.newArrayList(longCol().foreignKeyInfo(cascadeFKI("user").build()).build(), stringCol().columnName("another_table_string_column").foreignKeyInfo(cascadeFKI("another_table").columnName("string_column").build()).build()),
+                        new String[]{
+                                "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
+                                "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, int_column FROM " + TABLE_NAME + ";",
+                                "DROP TABLE IF EXISTS " + TABLE_NAME + ";",
+                                "CREATE TABLE " + TABLE_NAME + "(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, modified DATETIME DEFAULT CURRENT_TIMESTAMP, int_column INTEGER, long_column INTEGER, another_table_string_column TEXT, FOREIGN KEY(int_column) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE, FOREIGN KEY(long_column) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE, FOREIGN KEY(another_table_string_column) REFERENCES another_table(string_column) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER " + TABLE_NAME + "_updated_trigger AFTER UPDATE ON " + TABLE_NAME + " BEGIN UPDATE " + TABLE_NAME + " SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;",
                                 "INSERT INTO " + TABLE_NAME + " SELECT _id, created, deleted, modified, int_column, null AS long_column FROM temp_" + TABLE_NAME + ";",
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";"
@@ -203,7 +214,9 @@ public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {
 
     @Before
     public void setUp() {
-        generatorUnderTest = new AddForeignKeyGenerator(table, column);
+        if (generatorUnderTest == null) {
+            generatorUnderTest = new AddForeignKeyGenerator(table, newForeignKeyColumns);
+        }
     }
 
     @Override
