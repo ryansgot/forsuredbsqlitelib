@@ -49,29 +49,36 @@ public class QueryGenerationTest {
     @Parameterized.Parameters
     public static Iterable<Object[]> data() throws IOException {
         return Arrays.asList(new Object[][] {
-                // ALTER TABLE ADD COLUMN
+                // 0 ALTER TABLE ADD COLUMN
                 {
                         resourceText("alter_table_add_column_migration.json"),
                         Lists.newArrayList("ALTER TABLE user ADD COLUMN global_id INTEGER;")
                 },
-                // CREATE TABLE
+                // 1 CREATE TABLE
                 {
                         resourceText("create_table_migration.json"),
-                        Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, modified DATETIME DEFAULT CURRENT_TIMESTAMP);",
+                        Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, modified DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0);",
                                            "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;")
                 },
-                // ADD FOREIGN KEY
+                // 2 ADD FOREIGN KEY
                 {
                         resourceText("alter_table_add_foreign_key_migration.json"),
                         Lists.newArrayList("DROP TABLE IF EXISTS temp_profile_info;",
                                 "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, binary_data, email_address FROM profile_info;",
                                 "DROP TABLE IF EXISTS profile_info;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, modified DATETIME DEFAULT CURRENT_TIMESTAMP, user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, modified DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;",
                                 "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
                                 "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
                                 "INSERT INTO profile_info SELECT _id, created, deleted, modified, null AS user_id, binary_data, email_address FROM temp_profile_info;",
                                 "DROP TABLE IF EXISTS temp_profile_info;")
+                },
+                // 3 CREATE TABLE with unique column
+                {
+                        resourceText("create_table_migration_with_unique_column.json"),
+                        Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, modified DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, uuid TEXT UNIQUE);",
+                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;",
+                                "CREATE UNIQUE INDEX profile_info_uuid ON profile_info(uuid);")
                 }
         });
     }

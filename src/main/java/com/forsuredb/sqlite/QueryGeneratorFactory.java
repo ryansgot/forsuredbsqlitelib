@@ -53,28 +53,28 @@ public class QueryGeneratorFactory {
         newForeignKeyColumnMap = createNewForeignKeyMap(migrationSet);
     }
 
-    public QueryGenerator getFor(Migration migration, Map<String, TableInfo> targetContext) {
+    public QueryGenerator getFor(Migration migration, Map<String, TableInfo> targetSchema) {
         // Guards against null pointer exception by passing back a query generator that does nothing
         if (migration == null || migration.getType() == null) {
             return emptyGenerator;
         }
 
-        TableInfo table = targetContext.get(migration.getTableName());
+        TableInfo table = targetSchema.get(migration.getTableName());
         if (migration.getType() != Migration.Type.DROP_TABLE && table == null) {
             return emptyGenerator;  // <-- the target context will not have the table if it is about to be dropped
         }
 
         switch (migration.getType()) {
             case CREATE_TABLE:
-                return new CreateTableGenerator(table.getTableName());
+                return new CreateTableGenerator(table.getTableName(), targetSchema);
             case ADD_FOREIGN_KEY_REFERENCE:
                 List<String> allForeignKeys = newForeignKeyColumnMap.remove(migration.getTableName());
                 if (allForeignKeys == null) {   // <-- migration has already been run that creates all foreign keys
                     return emptyGenerator;
                 }
-                return new AddForeignKeyGenerator(table, listOfColumnInfo(table, allForeignKeys));
-            case ALTER_TABLE_ADD_UNIQUE:
-                return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
+                return new AddForeignKeyGenerator(table, listOfColumnInfo(table, allForeignKeys), targetSchema);
+//            case ALTER_TABLE_ADD_UNIQUE:
+//                return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ADD_UNIQUE_INDEX:
                 return new AddUniqueIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ALTER_TABLE_ADD_COLUMN:

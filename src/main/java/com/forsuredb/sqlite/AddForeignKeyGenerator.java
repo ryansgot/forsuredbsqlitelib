@@ -26,11 +26,13 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class AddForeignKeyGenerator extends QueryGenerator {
 
     private final TableInfo table;
     private final List<ColumnInfo> newForeignKeyColumns;
+    private final Map<String, TableInfo> targetSchema;
 
     /**
      * <p>
@@ -39,8 +41,8 @@ public class AddForeignKeyGenerator extends QueryGenerator {
      * @param table the table to which foreign key columns should be added
      * @param column the foreign key column to add
      */
-    public AddForeignKeyGenerator(TableInfo table, ColumnInfo column) {
-        this(table, Lists.newArrayList(column));
+    public AddForeignKeyGenerator(TableInfo table, ColumnInfo column, Map<String, TableInfo> targetSchema) {
+        this(table, Lists.newArrayList(column), targetSchema);
     }
 
     /**
@@ -50,10 +52,11 @@ public class AddForeignKeyGenerator extends QueryGenerator {
      * @param table the table to which foreign key columns should be added
      * @param newForeignKeyColumns a list of all new foreign key columns to add
      */
-    public AddForeignKeyGenerator(TableInfo table, List<ColumnInfo> newForeignKeyColumns) {
+    public AddForeignKeyGenerator(TableInfo table, List<ColumnInfo> newForeignKeyColumns, Map<String, TableInfo> targetSchema) {
         super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
         this.newForeignKeyColumns = newForeignKeyColumns;
+        this.targetSchema = targetSchema;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private List<String> recreateTableWithAllForeignKeysQuery() {
         final List<String> retList = new LinkedList<>();
-        List<String> normalCreationQueries = new com.forsuredb.sqlite.CreateTableGenerator(getTableName()).generate();
+        List<String> normalCreationQueries = new com.forsuredb.sqlite.CreateTableGenerator(getTableName(), targetSchema).generate();
 
         // add the default columns to the normal TABLE CREATE query
         StringBuffer buf = new StringBuffer(normalCreationQueries.remove(0));
@@ -99,7 +102,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
     private List<String> allColumnAdditionQueries() {
         List<String> retList = new LinkedList<>();
         for (ColumnInfo columnInfo : table.getNonForeignKeyColumns()) {
-            if (TableInfo.DEFAULT_COLUMNS.containsKey(columnInfo.getColumnName())) {
+            if (TableInfo.DEFAULT_COLUMNS.containsKey(columnInfo.getColumnName()) || columnInfo.isUnique()) {
                 continue;   // <-- these columns were added in the CREATE TABLE query
             }
 

@@ -17,18 +17,23 @@
  */
 package com.forsuredb.sqlite;
 
+import com.forsuredb.annotationprocessor.info.ColumnInfo;
+import com.forsuredb.annotationprocessor.info.TableInfo;
 import com.forsuredb.migration.Migration;
 import com.forsuredb.migration.QueryGenerator;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class CreateTableGenerator extends QueryGenerator {
 
-    public CreateTableGenerator(String tableName) {
+    private final Map<String, TableInfo> targetSchema;
+
+    public CreateTableGenerator(String tableName, Map<String, TableInfo> targetSchema) {
         super(tableName, Migration.Type.CREATE_TABLE);
+        this.targetSchema = targetSchema;
     }
 
     @Override
@@ -36,25 +41,57 @@ public class CreateTableGenerator extends QueryGenerator {
         List<String> queries = new LinkedList<>();
         queries.add(createTableQuery());
         queries.add(modifiedTriggerQuery());
+        queries.addAll(uniqueIndexQueries());
         return queries;
     }
 
     private String createTableQuery() {
-        return new StringBuffer("CREATE TABLE ").append(getTableName())
-                .append("(_id INTEGER PRIMARY KEY")
-                .append(", created DATETIME DEFAULT CURRENT_TIMESTAMP")
-                .append(", deleted INTEGER DEFAULT 0")
-                .append(", modified DATETIME DEFAULT CURRENT_TIMESTAMP);")
-                .toString();
+        StringBuilder buf = new StringBuilder("CREATE TABLE ").append(getTableName()).append("(");
+        appendDefaultColumns(buf);
+        appendUniqueColumns(buf);
+        return buf.append(");").toString();
+    }
+
+    private void appendDefaultColumns(StringBuilder buf) {
+        int startingLength = buf.length();
+        for (ColumnInfo column : TableInfo.DEFAULT_COLUMNS.values()) {
+            if (startingLength != buf.length()) {
+                buf.append(", ");
+            }
+            buf.append(columnDefinition(column));
+        }
+    }
+
+    private void appendUniqueColumns(StringBuilder buf) {
+        for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
+            if (column.isUnique()) {
+                buf.append(", ").append(columnDefinition(column));
+            }
+        }
+    }
+
+    private List<String> uniqueIndexQueries() {
+        List<String> ret = new ArrayList<>();
+        for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
+            if (!column.isUnique()) {
+                continue;
+            }
+            ret.addAll(new AddUniqueIndexGenerator(getTableName(), column).generate());
+        }
+        return ret;
+    }
+
+    private String columnDefinition(ColumnInfo column) {
+        return column.getColumnName()
+                + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
+                + (column.isPrimaryKey() ? " PRIMARY KEY" : "")
+                + (column.isUnique() ? " UNIQUE" : "")
+                + (column.hasDefaultValue() ? " DEFAULT " + column.getDefaultValue() : "");
     }
 
     private String modifiedTriggerQuery() {
-        return new StringBuffer("CREATE TRIGGER ").append(getTableName())
-                .append("_updated_trigger AFTER UPDATE ON ")
-                .append(getTableName())
-                .append(" BEGIN UPDATE ")
-                .append(getTableName())
-                .append(" SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;")
-                .toString();
+        return "CREATE TRIGGER "
+                + getTableName() + "_updated_trigger AFTER UPDATE ON " + getTableName()
+                + " BEGIN UPDATE " + getTableName() + " SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;";
     }
 }

@@ -1,0 +1,55 @@
+{
+  "ordered_migrations": [{
+    "table_name": "profile_info",
+    "migration_type": "CREATE_TABLE"
+  }],
+  "target_schema": {
+    "profile_info": {
+      "column_info_map": {
+        "deleted": {
+          "method_name": "deleted",
+          "column_name": "deleted",
+          "column_type": "boolean",
+          "default_value": "0",
+          "unique": false,
+          "primary_key": false
+        },
+        "created": {
+          "method_name": "created",
+          "column_name": "created",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "primary_key": false
+        },
+        "modified": {
+          "method_name": "modified",
+          "column_name": "modified",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "primary_key": false
+        },
+        "_id": {
+          "method_name": "id",
+          "column_name": "_id",
+          "column_type": "long",
+          "unique": false,
+          "primary_key": true
+        },
+        "uuid": {
+          "method_name": "uuid",
+          "column_name": "uuid",
+          "column_type": "java.util.String",
+          "unique": true,
+          "primary_key": false
+        }
+      },
+      "table_name": "profile_info",
+      "qualified_class_name": "com.forsuredb.testapp.model.ProfileInfoTable",
+      "static_data_asset": "profile_info.xml",
+      "static_data_record_name": "profile_info"
+    }
+  },
+  "db_version": 1
+}
