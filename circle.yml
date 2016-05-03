@@ -1,5 +1,5 @@
 test:
   override:
-    - ./gradlew clean compileJava test
+    - ./gradlew clean compileJava jacocoReport
   post:
     - cp -r build/reports/* $CIRCLE_TEST_REPORTS/
