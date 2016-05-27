@@ -1,2 +1,2 @@
 # forsuredbsqlitelib
-[![CircleCI](https://circleci.com/gh/ryansgot/forsuredbsqlitelib/tree/master.svg?style=svg)](https://circleci.com/gh/ryansgot/forsuredbsqlitelib/tree/master)
+[![CircleCI](https://circleci.com/gh/ryansgot/forsuredbsqlitelib/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/ryansgot/forsuredbsqlitelib/tree/master)
