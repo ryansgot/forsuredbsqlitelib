@@ -17,7 +17,7 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.migration.MigrationSet;
+import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 

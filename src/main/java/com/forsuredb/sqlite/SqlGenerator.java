@@ -17,11 +17,11 @@
  */
 package com.forsuredb.sqlite;
 
+import com.fsryan.forsuredb.api.migration.Migration;
+import com.fsryan.forsuredb.api.migration.MigrationSet;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.forsuredb.migration.Migration;
-import com.forsuredb.migration.MigrationSet;
 
 public class SqlGenerator {
 

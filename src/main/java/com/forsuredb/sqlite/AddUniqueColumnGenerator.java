@@ -17,9 +17,9 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.migration.Migration;
-import com.forsuredb.migration.QueryGenerator;
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.migration.Migration;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.LinkedList;
 import java.util.List;

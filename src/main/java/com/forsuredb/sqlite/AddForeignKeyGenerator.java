@@ -17,10 +17,10 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.migration.Migration;
-import com.forsuredb.migration.QueryGenerator;
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.annotationprocessor.info.TableInfo;
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.api.migration.Migration;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import com.google.common.collect.Lists;
 
 import java.util.Collections;

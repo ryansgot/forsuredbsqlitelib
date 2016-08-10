@@ -17,8 +17,7 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.migration.QueryGenerator;
-
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import org.junit.Test;
 
 import java.util.LinkedList;

@@ -17,10 +17,9 @@
  */
 package com.forsuredb.sqlite;
 
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.annotationprocessor.info.TableInfo;
-import com.forsuredb.migration.QueryGenerator;
-
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
