@@ -82,10 +82,10 @@ bintray {
         vcsUrl = 'https://github.com/ryansgot/forsuredbsqlitelib.git'
         publicDownloadNumbers = true
         version {
-            name = '0.1.0'
+            name = '0.2.0'
             desc = 'SQLite query generators for forsuredb project'
             released  = new Date()
-            vcsTag = 'v0.1.0'
+            vcsTag = 'v0.2.0'
         }
     }
 }
@@ -96,7 +96,7 @@ publishing {
             from components.java
             groupId = 'com.fsryan.forsuredb'
             artifactId = 'sqlitelib'
-            version = '0.1.0'
+            version = '0.2.0'
 
             artifact sourcesJar
             artifact javadocJar
