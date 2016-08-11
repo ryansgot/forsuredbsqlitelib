@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.google.common.collect.Lists;
@@ -30,18 +30,17 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.forsuredb.sqlite.TestData.resourceText;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class QueryGenerationTest {
+public class MigrationSqlQueryTest {
 
     private List<String> actualSqlOutput;
 
     private final String inputMigrationJson;
     private final List<String> expectedSqlOutput;
 
-    public QueryGenerationTest(String inputMigrationJson, List<String> expectedSqlOutput) {
+    public MigrationSqlQueryTest(String inputMigrationJson, List<String> expectedSqlOutput) {
         this.inputMigrationJson = inputMigrationJson;
         this.expectedSqlOutput = expectedSqlOutput;
     }
@@ -51,18 +50,18 @@ public class QueryGenerationTest {
         return Arrays.asList(new Object[][] {
                 // 0 ALTER TABLE ADD COLUMN
                 {
-                        resourceText("alter_table_add_column_migration.json"),
+                        TestData.resourceText("alter_table_add_column_migration.json"),
                         Lists.newArrayList("ALTER TABLE user ADD COLUMN global_id INTEGER;")
                 },
                 // 1 CREATE TABLE
                 {
-                        resourceText("create_table_migration.json"),
+                        TestData.resourceText("create_table_migration.json"),
                         Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, modified DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0);",
                                            "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;")
                 },
                 // 2 ADD FOREIGN KEY
                 {
-                        resourceText("alter_table_add_foreign_key_migration.json"),
+                        TestData.resourceText("alter_table_add_foreign_key_migration.json"),
                         Lists.newArrayList("DROP TABLE IF EXISTS temp_profile_info;",
                                 "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, binary_data, email_address FROM profile_info;",
                                 "DROP TABLE IF EXISTS profile_info;",
@@ -75,7 +74,7 @@ public class QueryGenerationTest {
                 },
                 // 3 CREATE TABLE with unique column
                 {
-                        resourceText("create_table_migration_with_unique_column.json"),
+                        TestData.resourceText("create_table_migration_with_unique_column.json"),
                         Lists.newArrayList("CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT CURRENT_TIMESTAMP, modified DATETIME DEFAULT CURRENT_TIMESTAMP, deleted INTEGER DEFAULT 0, uuid TEXT UNIQUE);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;",
                                 "CREATE UNIQUE INDEX profile_info_uuid ON profile_info(uuid);")
@@ -86,7 +85,7 @@ public class QueryGenerationTest {
     @Before
     public void setUp() {
         MigrationSet migrationSet = new Gson().fromJson(inputMigrationJson, MigrationSet.class);
-        actualSqlOutput = new SqlGenerator(migrationSet).generate();
+        actualSqlOutput = new SqlGenerator().generateMigrationSql(migrationSet);
     }
 
     @Test

@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.info.ColumnInfo;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
@@ -26,13 +26,13 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 
 @RunWith(Parameterized.class)
-public class AddUniqueColumnGeneratorTest extends BaseSQLiteGeneratorTest {
+public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
-    private AddUniqueColumnGenerator generatorUnderTest;
+    private AddColumnGenerator generatorUndertest;
 
     private ColumnInfo column;
 
-    public AddUniqueColumnGeneratorTest(ColumnInfo column, String... expectedSql) {
+    public AddColumnGeneratorTest(ColumnInfo column, String... expectedSql) {
         super(expectedSql);
         this.column = column;
     }
@@ -40,23 +40,30 @@ public class AddUniqueColumnGeneratorTest extends BaseSQLiteGeneratorTest {
     @Parameterized.Parameters
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
+                // add a normal column
                 {
                         TestData.stringCol().build(),
                         new String[] {
-                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN string_column TEXT;",
-                                "CREATE UNIQUE INDEX " + TestData.TABLE_NAME + "_string_column ON " + TestData.TABLE_NAME + "(string_column);"
+                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN string_column TEXT;"
                         }
                 },
+                // add a column that has a default set
+                {
+                        TestData.dateCol().defaultValue("CURRENT_TIMESTAMP").build(),
+                        new String[] {
+                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN date_column DATETIME DEFAULT CURRENT_TIMESTAMP;"
+                        }
+                }
         });
-    }
-
-    @Before
-    public void setUp() {
-        generatorUnderTest = new AddUniqueColumnGenerator(TestData.TABLE_NAME, column);
     }
 
     @Override
     protected QueryGenerator getGenerator() {
-        return generatorUnderTest;
+        return generatorUndertest;
+    }
+
+    @Before
+    public void setUp() {
+        generatorUndertest = new AddColumnGenerator(TestData.TABLE_NAME, column);
     }
 }

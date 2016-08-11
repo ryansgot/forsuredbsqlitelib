@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.info.ColumnInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
@@ -24,22 +24,21 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AddColumnGenerator extends QueryGenerator {
+public class AddUniqueColumnGenerator extends QueryGenerator {
+
 
     private final ColumnInfo column;
 
-    public AddColumnGenerator(String tableName, ColumnInfo column) {
-        super(tableName, Migration.Type.ALTER_TABLE_ADD_COLUMN);
+    public AddUniqueColumnGenerator(String tableName, ColumnInfo column) {
+        super(tableName, Migration.Type.ALTER_TABLE_ADD_UNIQUE);
         this.column = column;
     }
 
     @Override
     public List<String> generate() {
-        List<String> queries = new LinkedList<>();
-        queries.add("ALTER TABLE " + getTableName()
-                + " ADD COLUMN " + column.getColumnName()
-                + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
-                + (column.hasDefaultValue() ? " DEFAULT " + column.getDefaultValue() : "") + ";");
-        return queries;
+        List<String> retList = new LinkedList<>();
+        retList.addAll(new AddColumnGenerator(getTableName(), column).generate());
+        retList.addAll(new AddUniqueIndexGenerator(getTableName(), column).generate());
+        return retList;
     }
 }

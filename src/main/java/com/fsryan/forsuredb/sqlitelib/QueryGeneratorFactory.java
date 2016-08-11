@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.info.ColumnInfo;
 import com.fsryan.forsuredb.api.info.TableInfo;

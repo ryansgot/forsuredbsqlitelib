@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.annotations.ForeignKey;
 import com.fsryan.forsuredb.api.info.ColumnInfo;
@@ -26,7 +26,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 

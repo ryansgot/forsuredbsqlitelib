@@ -43,9 +43,9 @@ jacoco {
 
 task jacocoReport(type: JacocoReport, dependsOn: 'test') {
 
-    jacoco {
-        version "0.7.6.201602180812"
-    }
+//    jacoco {
+//        version "0.7.6.201602180812"
+//    }
 
     group = 'Reporting'
     description = 'Generate Jacoco coverage reports after running tests.'
@@ -54,7 +54,10 @@ task jacocoReport(type: JacocoReport, dependsOn: 'test') {
     sourceDirectories = files('/src/main/java')
     classDirectories = fileTree(
             dir: 'build/classes',
-            excludes: []
+            excludes: [
+                    "**/*Test.class",
+                    "**/*TestData.class"
+            ]
     )
 
     reports {
