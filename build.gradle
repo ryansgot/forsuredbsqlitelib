@@ -43,10 +43,6 @@ jacoco {
 
 task jacocoReport(type: JacocoReport, dependsOn: 'test') {
 
-//    jacoco {
-//        version "0.7.6.201602180812"
-//    }
-
     group = 'Reporting'
     description = 'Generate Jacoco coverage reports after running tests.'
 
