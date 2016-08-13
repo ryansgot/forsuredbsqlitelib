@@ -130,17 +130,17 @@ public class SqlGeneratorTest {
 
         @Test
         public void shouldOutputCorrectSql() {
-            assertEquals(expectedOutputSql, sqlGenerator.singleRowInsertionSql(tableName, inputColumnValueMap));
+            assertEquals(expectedOutputSql, sqlGenerator.newSingleRowInsertionSql(tableName, inputColumnValueMap));
         }
 
         @Test
         public void outputShouldBeAtLeastLength1() {
-            assertTrue(0 < sqlGenerator.singleRowInsertionSql(tableName, inputColumnValueMap).length());
+            assertTrue(0 < sqlGenerator.newSingleRowInsertionSql(tableName, inputColumnValueMap).length());
         }
 
         @Test
         public void outputShouldEndInSemicolon() {
-            assertTrue(sqlGenerator.singleRowInsertionSql(tableName, inputColumnValueMap).endsWith(";"));
+            assertTrue(sqlGenerator.newSingleRowInsertionSql(tableName, inputColumnValueMap).endsWith(";"));
         }
     }
 }
