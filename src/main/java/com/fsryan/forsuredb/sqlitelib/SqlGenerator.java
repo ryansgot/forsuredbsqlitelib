@@ -34,7 +34,7 @@ public class SqlGenerator implements DBMSIntegrator {
 
     @VisibleForTesting
     /*package*/ static final String EMPTY_SQL = ";";
-    private static final Set<String> nonInsertableColumns = Sets.newHashSet("_id", "created", "modified");
+    private static final Set<String> columnExclusionFilter = Sets.newHashSet("_id", "created", "modified");
 
     public SqlGenerator() {}
 
@@ -54,7 +54,7 @@ public class SqlGenerator implements DBMSIntegrator {
     }
 
     @Override
-    public String singleRowInsertionSql(String tableName, Map<String, String> columnValueMap) {
+    public String newSingleRowInsertionSql(String tableName, Map<String, String> columnValueMap) {
         if (isNullOrEmpty(tableName) || columnValueMap == null || columnValueMap.isEmpty()) {
             return EMPTY_SQL;
         }
@@ -64,7 +64,7 @@ public class SqlGenerator implements DBMSIntegrator {
 
         for (Map.Entry<String, String> colValEntry : columnValueMap.entrySet()) {
             final String columnName = colValEntry.getKey();
-            if (columnName.isEmpty() || nonInsertableColumns.contains(columnName)) {
+            if (columnName.isEmpty() || columnExclusionFilter.contains(columnName)) {
                 continue;   // <-- never insert an _id column
             }
             final String val = colValEntry.getValue();
