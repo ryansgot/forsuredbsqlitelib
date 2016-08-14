@@ -15,12 +15,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.annotationprocessor.info.TableInfo;
-import com.forsuredb.migration.Migration;
-import com.forsuredb.migration.QueryGenerator;
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.api.migration.Migration;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.Collections;
 import java.util.HashMap;

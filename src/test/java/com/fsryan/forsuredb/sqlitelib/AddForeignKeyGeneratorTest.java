@@ -15,22 +15,17 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
-import com.forsuredb.annotation.ForeignKey;
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.annotationprocessor.info.TableInfo;
-import com.forsuredb.migration.QueryGenerator;
-
-import com.google.common.collect.Lists;
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.forsuredb.sqlite.TestData.*;
 
 @RunWith(Parameterized.class)
 public class AddForeignKeyGeneratorTest extends BaseSQLiteGeneratorTest {

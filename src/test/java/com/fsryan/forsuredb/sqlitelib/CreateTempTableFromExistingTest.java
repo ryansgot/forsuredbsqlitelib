@@ -15,19 +15,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.forsuredb.sqlite;
+package com.fsryan.forsuredb.sqlitelib;
 
-import com.forsuredb.annotationprocessor.info.ColumnInfo;
-import com.forsuredb.annotationprocessor.info.TableInfo;
-import com.forsuredb.migration.QueryGenerator;
-
+import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
-
-import static com.forsuredb.sqlite.TestData.*;
 
 @RunWith(Parameterized.class)
 public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
@@ -48,7 +45,7 @@ public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
         return Arrays.asList(new Object[][]{
                 // Copy a table with a non-default column
                 {
-                        table().columnMap(columnMapOf(stringCol().build())).build(),
+                        TestData.table().columnMap(TestData.columnMapOf(TestData.stringCol().build())).build(),
                         new ColumnInfo[] {},
                         new String[] {
                                 "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
@@ -57,7 +54,7 @@ public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
                 },
                 // Copy a table with a foreign key column
                 {
-                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user").build()).build())).build(),
+                        TestData.table().columnMap(TestData.columnMapOf(TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build())).build(),
                         new ColumnInfo[] {},
                         new String[] {
                                 "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
@@ -66,9 +63,9 @@ public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
                 },
                 // Copy a table with an excluded column
                 {
-                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user").build()).build())).build(),
+                        TestData.table().columnMap(TestData.columnMapOf(TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build())).build(),
                         new ColumnInfo[] {
-                                longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build()
+                                TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build()
                         },
                         new String[] {
                                 "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
