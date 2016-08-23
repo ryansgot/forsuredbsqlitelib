@@ -26,6 +26,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static com.fsryan.forsuredb.sqlitelib.TestData.*;
+
 @RunWith(Parameterized.class)
 public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
 
@@ -45,31 +47,31 @@ public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
         return Arrays.asList(new Object[][]{
                 // Copy a table with a non-default column
                 {
-                        TestData.table().columnMap(TestData.columnMapOf(TestData.stringCol().build())).build(),
+                        table().columnMap(columnMapOf(stringCol().build())).build(),
                         new ColumnInfo[] {},
                         new String[] {
-                                "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
-                                "CREATE TEMP TABLE temp_" + TestData.TABLE_NAME + " AS SELECT _id, created, deleted, modified, string_column FROM " + TestData.TABLE_NAME + ";"
+                                "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
+                                "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, string_column FROM " + TABLE_NAME + ";"
                         }
                 },
                 // Copy a table with a foreign key column
                 {
-                        TestData.table().columnMap(TestData.columnMapOf(TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build())).build(),
+                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user").build()).build())).build(),
                         new ColumnInfo[] {},
                         new String[] {
-                                "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
-                                "CREATE TEMP TABLE temp_" + TestData.TABLE_NAME + " AS SELECT _id, created, deleted, modified, long_column FROM " + TestData.TABLE_NAME + ";"
+                                "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
+                                "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified, long_column FROM " + TABLE_NAME + ";"
                         }
                 },
                 // Copy a table with an excluded column
                 {
-                        TestData.table().columnMap(TestData.columnMapOf(TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build())).build(),
+                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user").build()).build())).build(),
                         new ColumnInfo[] {
-                                TestData.longCol().foreignKeyInfo(TestData.cascadeFKI("user").build()).build()
+                                longCol().foreignKeyInfo(cascadeFKI("user").build()).build()
                         },
                         new String[] {
-                                "DROP TABLE IF EXISTS temp_" + TestData.TABLE_NAME + ";",
-                                "CREATE TEMP TABLE temp_" + TestData.TABLE_NAME + " AS SELECT _id, created, deleted, modified FROM " + TestData.TABLE_NAME + ";"
+                                "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",
+                                "CREATE TEMP TABLE temp_" + TABLE_NAME + " AS SELECT _id, created, deleted, modified FROM " + TABLE_NAME + ";"
                         }
                 },
         });
