@@ -25,6 +25,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static com.fsryan.forsuredb.sqlitelib.TestData.TABLE_NAME;
+
 @RunWith(Parameterized.class)
 public class AddUniqueColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
@@ -43,8 +45,8 @@ public class AddUniqueColumnGeneratorTest extends BaseSQLiteGeneratorTest {
                 {
                         TestData.stringCol().build(),
                         new String[] {
-                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN string_column TEXT;",
-                                "CREATE UNIQUE INDEX " + TestData.TABLE_NAME + "_string_column ON " + TestData.TABLE_NAME + "(string_column);"
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN string_column TEXT;",
+                                "CREATE UNIQUE INDEX IF NOT EXISTS " + TABLE_NAME + "_string_column ON " + TABLE_NAME + "(string_column);"
                         }
                 },
         });
@@ -52,7 +54,7 @@ public class AddUniqueColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
     @Before
     public void setUp() {
-        generatorUnderTest = new AddUniqueColumnGenerator(TestData.TABLE_NAME, column);
+        generatorUnderTest = new AddUniqueColumnGenerator(TABLE_NAME, column);
     }
 
     @Override

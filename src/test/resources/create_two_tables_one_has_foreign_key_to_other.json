@@ -89,11 +89,11 @@
           "primary_key": false
         },
         "test_table_unique_index_column": {
-          "method_name": "uniqueIndexColumn",
-          "column_name": "unique_index_column",
+          "method_name": "testTableUniqueIndexColumn",
+          "column_name": "test_table_unique_index_column",
           "column_type": "java.lang.String",
-          "unique": true,
-          "index": true,
+          "unique": false,
+          "index": false,
           "primary_key": false,
           "foreign_key_info": {
             "update_action": "CASCADE",

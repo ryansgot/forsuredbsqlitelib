@@ -73,10 +73,13 @@ public class QueryGeneratorFactory {
                     return emptyGenerator;
                 }
                 return new AddForeignKeyGenerator(table, listOfColumnInfo(table, allForeignKeys), targetSchema);
+            // TODO: figure out whether you will do anything with this or just always put the unique columns in the table create queries
 //            case ALTER_TABLE_ADD_UNIQUE:
 //                return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ADD_UNIQUE_INDEX:
-                return new AddUniqueIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
+                return new AddIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()), true);
+            case ADD_INDEX:
+                return new AddIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case ALTER_TABLE_ADD_COLUMN:
                 return new AddColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case DROP_TABLE:
