@@ -24,19 +24,27 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AddUniqueIndexGenerator extends QueryGenerator {
+public class AddIndexGenerator extends QueryGenerator {
 
+    private final boolean unique;
     private final ColumnInfo column;
 
-    public AddUniqueIndexGenerator(String tableName, ColumnInfo column) {
-        super(tableName, Migration.Type.ADD_UNIQUE_INDEX);
+    public AddIndexGenerator(String tableName, ColumnInfo column) {
+        this(tableName, column, false);
+    }
+
+    /*package*/ AddIndexGenerator(String tableName, ColumnInfo column, boolean forceUnique) {
+        super(tableName, forceUnique || column.isUnique() ? Migration.Type.ADD_UNIQUE_INDEX : Migration.Type.ADD_INDEX);
         this.column = column;
+        unique = forceUnique || column.isUnique();
     }
 
     @Override
     public List<String> generate() {
         List<String> retList = new LinkedList<>();
-        retList.add("CREATE UNIQUE INDEX " + getTableName() + "_" + column.getColumnName() + " ON " + getTableName() + "(" + column.getColumnName() + ");");
+        retList.add("CREATE" + (unique ? " UNIQUE" : "") + " INDEX IF NOT EXISTS "
+                + getTableName() + "_" + column.getColumnName() +
+                " ON " + getTableName() + "(" + column.getColumnName() + ");");
         return retList;
     }
 }

@@ -39,7 +39,18 @@ public class AddColumnGenerator extends QueryGenerator {
         queries.add("ALTER TABLE " + getTableName()
                 + " ADD COLUMN " + column.getColumnName()
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
-                + (column.hasDefaultValue() ? " DEFAULT " + column.getDefaultValue() : "") + ";");
+                + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "") + ";");
+        if (column.isIndex()) {
+            queries.addAll(new AddIndexGenerator(getTableName(), column).generate());
+        }
         return queries;
+    }
+
+    private String getDefaultValueFrom(ColumnInfo column) {
+        TypeTranslator tt = TypeTranslator.from(column.getQualifiedType());
+        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
+            return " '" + column.getDefaultValue() + "'";
+        }
+        return "(" + SqlGenerator.CURRENT_UTC_TIME + ")";
     }
 }

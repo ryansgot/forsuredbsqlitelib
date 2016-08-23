@@ -25,6 +25,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static com.fsryan.forsuredb.sqlitelib.TestData.*;
+
 @RunWith(Parameterized.class)
 public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
@@ -40,18 +42,42 @@ public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
     @Parameterized.Parameters
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                // add a normal column
-                {
-                        TestData.stringCol().build(),
+                {   // 00: add a normal column
+                        stringCol().build(),
                         new String[] {
-                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN string_column TEXT;"
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN string_column TEXT;"
                         }
                 },
-                // add a column that has a default set
-                {
-                        TestData.dateCol().defaultValue("CURRENT_TIMESTAMP").build(),
+                {   // 01: add a date column that has CURRENT_TIMESTAMP magic string as its time set
+                        dateCol().defaultValue("CURRENT_TIMESTAMP").build(),
                         new String[] {
-                                "ALTER TABLE " + TestData.TABLE_NAME + " ADD COLUMN date_column DATETIME DEFAULT CURRENT_TIMESTAMP;"
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN date_column DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + ");"
+                        }
+                },
+                {   // 02: add a column that has a default set that is not CURRENT_TIMESTAMP
+                        dateCol().defaultValue("2000-01-01 00:00:00.000").build(),
+                        new String[] {
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN date_column DATETIME DEFAULT '2000-01-01 00:00:00.000';"
+                        }
+                },
+                {   // 03: add an integer column that has a default set
+                        intCol().defaultValue("10").build(),
+                        new String[] {
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN int_column INTEGER DEFAULT '10';"
+                        }
+                },
+                {   // 04: add column that is an index
+                        intCol().index(true).build(),
+                        new String[] {
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN int_column INTEGER;",
+                                "CREATE INDEX IF NOT EXISTS " + TABLE_NAME + "_int_column ON " + TABLE_NAME + "(int_column);"
+                        }
+                },
+                {   // 05: add column that is an index and has a default value
+                        intCol().defaultValue("10").index(true).build(),
+                        new String[] {
+                                "ALTER TABLE " + TABLE_NAME + " ADD COLUMN int_column INTEGER DEFAULT '10';",
+                                "CREATE INDEX IF NOT EXISTS " + TABLE_NAME + "_int_column ON " + TABLE_NAME + "(int_column);"
                         }
                 }
         });
@@ -64,6 +90,6 @@ public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
     @Before
     public void setUp() {
-        generatorUndertest = new AddColumnGenerator(TestData.TABLE_NAME, column);
+        generatorUndertest = new AddColumnGenerator(TABLE_NAME, column);
     }
 }
