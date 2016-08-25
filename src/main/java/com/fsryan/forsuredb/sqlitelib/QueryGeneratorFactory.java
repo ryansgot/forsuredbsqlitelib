@@ -76,6 +76,8 @@ public class QueryGeneratorFactory {
             // TODO: figure out whether you will do anything with this or just always put the unique columns in the table create queries
 //            case ALTER_TABLE_ADD_UNIQUE:
 //                return new AddUniqueColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
+            case MAKE_COLUMN_UNIQUE:
+                // Intentionally falling through
             case ADD_UNIQUE_INDEX:
                 return new AddIndexGenerator(table.getTableName(), table.getColumn(migration.getColumnName()), true);
             case ADD_INDEX:

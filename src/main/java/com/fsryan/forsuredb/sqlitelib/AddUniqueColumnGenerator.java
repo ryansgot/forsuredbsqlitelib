@@ -26,7 +26,6 @@ import java.util.List;
 
 public class AddUniqueColumnGenerator extends QueryGenerator {
 
-
     private final ColumnInfo column;
 
     public AddUniqueColumnGenerator(String tableName, ColumnInfo column) {
