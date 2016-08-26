@@ -3,3 +3,4 @@ test:
     - ./gradlew clean compileJava jacocoReport
   post:
     - cp -r build/reports/* $CIRCLE_TEST_REPORTS/
+    - bash <(curl -s https://codecov.io/bash)
