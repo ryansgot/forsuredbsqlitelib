@@ -32,6 +32,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class SqlGenerator implements DBMSIntegrator {
 
+    public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
+
     @VisibleForTesting
     /*package*/ static final String EMPTY_SQL = ";";
     private static final Set<String> columnExclusionFilter = Sets.newHashSet("_id", "created", "modified");

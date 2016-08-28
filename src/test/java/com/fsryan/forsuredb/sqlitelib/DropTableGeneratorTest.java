@@ -24,6 +24,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+import static com.fsryan.forsuredb.sqlitelib.TestData.TABLE_NAME;
+
 @RunWith(Parameterized.class)
 public class DropTableGeneratorTest extends BaseSQLiteGeneratorTest {
 
@@ -38,7 +40,7 @@ public class DropTableGeneratorTest extends BaseSQLiteGeneratorTest {
         return Arrays.asList(new Object[][] {
                 {
                         new String[]{
-                                "DROP TABLE IF EXISTS " + TestData.TABLE_NAME + ";"
+                                "DROP TABLE IF EXISTS " + TABLE_NAME + ";"
                         }
                 }
         });
@@ -51,6 +53,6 @@ public class DropTableGeneratorTest extends BaseSQLiteGeneratorTest {
 
     @Before
     public void setUp() {
-        generatorUnderTest = new DropTableGenerator(TestData.TABLE_NAME);
+        generatorUnderTest = new DropTableGenerator(TABLE_NAME);
     }
 }

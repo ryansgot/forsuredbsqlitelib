@@ -26,7 +26,6 @@ import java.util.List;
 
 public class AddUniqueColumnGenerator extends QueryGenerator {
 
-
     private final ColumnInfo column;
 
     public AddUniqueColumnGenerator(String tableName, ColumnInfo column) {
@@ -38,7 +37,7 @@ public class AddUniqueColumnGenerator extends QueryGenerator {
     public List<String> generate() {
         List<String> retList = new LinkedList<>();
         retList.addAll(new AddColumnGenerator(getTableName(), column).generate());
-        retList.addAll(new AddUniqueIndexGenerator(getTableName(), column).generate());
+        retList.addAll(new AddIndexGenerator(getTableName(), column, true).generate());
         return retList;
     }
 }

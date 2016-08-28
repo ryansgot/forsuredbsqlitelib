@@ -1,0 +1,137 @@
+{
+  "ordered_migrations": [{
+    "table_name": "test_table",
+    "migration_type": "CREATE_TABLE"
+  },
+    {
+      "table_name": "test_table2",
+      "migration_type": "CREATE_TABLE"
+    },
+    {
+      "table_name": "test_table",
+      "column_name": "non_unique_index_column",
+      "migration_type": "ALTER_TABLE_ADD_COLUMN"
+    },
+    {
+      "table_name": "test_table",
+      "column_name": "unique_index_column",
+      "migration_type": "ALTER_TABLE_ADD_UNIQUE"
+    },
+    {
+      "table_name": "test_table2",
+      "column_name": "test_table_unique_index_column",
+      "migration_type": "ADD_FOREIGN_KEY_REFERENCE"
+    }],
+  "target_schema": {
+    "test_table": {
+      "column_info_map": {
+        "deleted": {
+          "method_name": "deleted",
+          "column_name": "deleted",
+          "column_type": "boolean",
+          "default_value": "0",
+          "unique": false,
+          "primary_key": false
+        },
+        "non_unique_index_column": {
+          "method_name": "nonUniqueIndexColumn",
+          "column_name": "non_unique_index_column",
+          "column_type": "java.lang.String",
+          "unique": false,
+          "index": true,
+          "primary_key": false
+        },
+        "unique_index_column": {
+          "method_name": "uniqueIndexColumn",
+          "column_name": "unique_index_column",
+          "column_type": "java.lang.String",
+          "unique": true,
+          "index": true,
+          "primary_key": false
+        },
+        "created": {
+          "method_name": "created",
+          "column_name": "created",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "index": false,
+          "primary_key": false
+        },
+        "modified": {
+          "method_name": "modified",
+          "column_name": "modified",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "index": false,
+          "primary_key": false
+        },
+        "_id": {
+          "method_name": "id",
+          "column_name": "_id",
+          "column_type": "long",
+          "unique": false,
+          "primary_key": true
+        }
+      },
+      "table_name": "test_table",
+      "qualified_class_name": "com.fsryan.forsuredb.test.TestTable"
+    },
+    "test_table2": {
+      "column_info_map": {
+        "deleted": {
+          "method_name": "deleted",
+          "column_name": "deleted",
+          "column_type": "boolean",
+          "default_value": "0",
+          "unique": false,
+          "primary_key": false
+        },
+        "test_table_unique_index_column": {
+          "method_name": "testTableUniqueIndexColumn",
+          "column_name": "test_table_unique_index_column",
+          "column_type": "java.lang.String",
+          "unique": false,
+          "index": false,
+          "primary_key": false,
+          "foreign_key_info": {
+            "update_action": "CASCADE",
+            "delete_action": "CASCADE",
+            "foreign_table_name": "test_table",
+            "foreign_column_name": "unique_index_column",
+            "foreign_api_class_name": "com.fsryan.forsuredb.test.TestTable"
+          }
+        },
+        "created": {
+          "method_name": "created",
+          "column_name": "created",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "index": false,
+          "primary_key": false
+        },
+        "modified": {
+          "method_name": "modified",
+          "column_name": "modified",
+          "column_type": "java.util.Date",
+          "default_value": "CURRENT_TIMESTAMP",
+          "unique": false,
+          "index": false,
+          "primary_key": false
+        },
+        "_id": {
+          "method_name": "id",
+          "column_name": "_id",
+          "column_type": "long",
+          "unique": false,
+          "primary_key": true
+        }
+      },
+      "table_name": "test_table2",
+      "qualified_class_name": "com.fsryan.forsuredb.test.TestTable2"
+    }
+  },
+  "db_version": 1
+}

@@ -77,7 +77,7 @@ public class CreateTableGenerator extends QueryGenerator {
             if (!column.isUnique()) {
                 continue;
             }
-            ret.addAll(new AddUniqueIndexGenerator(getTableName(), column).generate());
+            ret.addAll(new AddIndexGenerator(getTableName(), column).generate());
         }
         return ret;
     }
@@ -87,12 +87,20 @@ public class CreateTableGenerator extends QueryGenerator {
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
                 + (column.isPrimaryKey() ? " PRIMARY KEY" : "")
                 + (column.isUnique() ? " UNIQUE" : "")
-                + (column.hasDefaultValue() ? " DEFAULT " + column.getDefaultValue() : "");
+                + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "");
+    }
+
+    private String getDefaultValueFrom(ColumnInfo column) {
+        TypeTranslator tt = TypeTranslator.from(column.getQualifiedType());
+        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
+            return " '" + column.getDefaultValue() + "'";
+        }
+        return "(" + SqlGenerator.CURRENT_UTC_TIME + ")";
     }
 
     private String modifiedTriggerQuery() {
         return "CREATE TRIGGER "
                 + getTableName() + "_updated_trigger AFTER UPDATE ON " + getTableName()
-                + " BEGIN UPDATE " + getTableName() + " SET modified=CURRENT_TIMESTAMP WHERE _id=NEW._id; END;";
+                + " BEGIN UPDATE " + getTableName() + " SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;";
     }
 }
