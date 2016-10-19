@@ -80,4 +80,14 @@ public class SqlGenerator implements DBMSIntegrator {
         valueBuf.delete(valueBuf.length() - 2, valueBuf.length());  // <-- remove final ", "
         return queryBuf.append(") VALUES (").append(valueBuf.toString()).append(");").toString();
     }
+
+    @Override
+    public String unambiguousColumn(String tableName, String columnName) {
+        return tableName + "." + columnName;
+    }
+
+    @Override
+    public String unambiguousRetrievalColumn(String tableName, String columnName) {
+        return unambiguousColumn(tableName, columnName);
+    }
 }
