@@ -3,6 +3,9 @@ Current build status: [![CircleCI](https://circleci.com/gh/ryansgot/forsuredbsql
 
 
 ## Revisions
+### 0.4.0
+- Integration with forsuredbapi-0.9.0--specifically regarding the ```DBMSIntegrator``` interface.
+
 ### 0.3.0
 - Support for index creation for columns that are not uniuqe
 - Fix new column creation bug where uniqueness was not considered
