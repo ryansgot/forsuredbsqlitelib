@@ -17,13 +17,17 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
+import com.fsryan.forsuredb.api.Finder;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.sqlgeneration.DBMSIntegrator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +37,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     @VisibleForTesting
     /*package*/ static final String EMPTY_SQL = ";";
@@ -67,7 +72,7 @@ public class SqlGenerator implements DBMSIntegrator {
         for (Map.Entry<String, String> colValEntry : columnValueMap.entrySet()) {
             final String columnName = colValEntry.getKey();
             if (columnName.isEmpty() || columnExclusionFilter.contains(columnName)) {
-                continue;   // <-- never insert an _id column
+                continue;   // <-- never insert _id, created, or modified columns
             }
             final String val = colValEntry.getValue();
             if (!isNullOrEmpty(val)) {
@@ -79,5 +84,74 @@ public class SqlGenerator implements DBMSIntegrator {
         queryBuf.delete(queryBuf.length() - 2, queryBuf.length());  // <-- remove final ", "
         valueBuf.delete(valueBuf.length() - 2, valueBuf.length());  // <-- remove final ", "
         return queryBuf.append(") VALUES (").append(valueBuf.toString()).append(");").toString();
+    }
+
+    @Override
+    public String unambiguousColumn(String tableName, String columnName) {
+        return tableName + "." + columnName;
+    }
+
+    @Override
+    public String unambiguousRetrievalColumn(String tableName, String columnName) {
+        return unambiguousColumn(tableName, columnName);
+    }
+
+    @Override
+    public String orderByAsc(String tableName, String columnName) {
+        return unambiguousColumn(tableName, columnName) + " ASC";
+    }
+
+    @Override
+    public String orderByDesc(String tableName, String columnName) {
+        return unambiguousColumn(tableName, columnName) + " DESC";
+    }
+
+    @Override
+    public String combineOrderByExpressions(List<String> orderByList) {
+        return orderByList.size() == 0 ? "" : orderByList.toString().replaceAll("(\\[|\\])", "");
+    }
+
+    @Override
+    public String whereOperation(String tableName, String column, int operation) {
+        switch (operation) {
+            case Finder.OP_EQ: return unambiguousColumn(tableName, column) + " =";
+            case Finder.OP_GE: return unambiguousColumn(tableName, column) + " >=";
+            case Finder.OP_GT: return unambiguousColumn(tableName, column) + " >";
+            case Finder.OP_LE: return unambiguousColumn(tableName, column) + " <=";
+            case Finder.OP_LIKE: return unambiguousColumn(tableName, column) + " LIKE";
+            case Finder.OP_LT: return unambiguousColumn(tableName, column) + " <";
+            case Finder.OP_NE: return unambiguousColumn(tableName, column) + " !=";
+        }
+        return "";
+    }
+
+    @Override
+    public String formatDate(Date date) {
+        return DATE_FORMAT.format(date);
+    }
+
+    @Override
+    public Date parseDate(String dateStr) {
+        try {
+            return DATE_FORMAT.parse(dateStr);
+        } catch (ParseException pe) {
+            pe.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String wildcardKeyword() {
+        return "%";
+    }
+
+    @Override
+    public String andKeyword() {
+        return "AND";
+    }
+
+    @Override
+    public String orKeyword() {
+        return "OR";
     }
 }
