@@ -46,12 +46,13 @@ task jacocoReport(type: JacocoReport, dependsOn: 'test') {
     description = 'Generate Jacoco coverage reports after running tests.'
 
     executionData = files('build/jacoco/test.exec')
-    sourceDirectories = files('/src/main/java')
+    sourceDirectories = files('src/main/java')
     classDirectories = fileTree(
             dir: 'build/classes',
             excludes: [
                     "**/*Test.class",
-                    "**/*TestData.class"
+                    "**/*TestData.class",
+                    "**/CollectionUtil.class"
             ]
     )
 

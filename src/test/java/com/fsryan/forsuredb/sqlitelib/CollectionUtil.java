@@ -9,7 +9,7 @@ public class CollectionUtil {
         if (kvPairs == null || kvPairs.length % 2 == 1) {
             throw new IllegalArgumentException("Must not send in null kvPairs array");
         }
-        
+
         Map<String, String> ret = new HashMap<>();
         for (int i = 0; i < kvPairs.length; i += 2) {
             ret.put(kvPairs[i], kvPairs[i + 1]);
