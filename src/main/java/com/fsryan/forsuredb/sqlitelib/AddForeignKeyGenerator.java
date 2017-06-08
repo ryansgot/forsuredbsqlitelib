@@ -21,12 +21,8 @@ import com.fsryan.forsuredb.api.info.ColumnInfo;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
-import com.google.common.collect.Lists;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AddForeignKeyGenerator extends QueryGenerator {
 
@@ -42,7 +38,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
      * @param column the foreign key column to add
      */
     public AddForeignKeyGenerator(TableInfo table, ColumnInfo column, Map<String, TableInfo> targetSchema) {
-        this(table, Lists.newArrayList(column), targetSchema);
+        this(table, new ArrayList<>(Arrays.asList(column)), targetSchema);
     }
 
     /**

@@ -21,27 +21,19 @@ import com.fsryan.forsuredb.api.Finder;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.sqlgeneration.DBMSIntegrator;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import java.util.*;
 
 public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    @VisibleForTesting
+    // visible for testing
     /*package*/ static final String EMPTY_SQL = ";";
-    private static final Set<String> columnExclusionFilter = Sets.newHashSet("_id", "created", "modified");
+    private static final Set<String> columnExclusionFilter = new HashSet<>(Arrays.asList("_id", "created", "modified"));
 
     public SqlGenerator() {}
 
@@ -62,7 +54,7 @@ public class SqlGenerator implements DBMSIntegrator {
 
     @Override
     public String newSingleRowInsertionSql(String tableName, Map<String, String> columnValueMap) {
-        if (isNullOrEmpty(tableName) || columnValueMap == null || columnValueMap.isEmpty()) {
+        if (tableName == null || tableName.isEmpty() || columnValueMap == null || columnValueMap.isEmpty()) {
             return EMPTY_SQL;
         }
 
@@ -75,7 +67,7 @@ public class SqlGenerator implements DBMSIntegrator {
                 continue;   // <-- never insert _id, created, or modified columns
             }
             final String val = colValEntry.getValue();
-            if (!isNullOrEmpty(val)) {
+            if (val != null && !val.isEmpty()) {
                 queryBuf.append(columnName).append(", ");
                 valueBuf.append("'").append(val).append("', ");
             }

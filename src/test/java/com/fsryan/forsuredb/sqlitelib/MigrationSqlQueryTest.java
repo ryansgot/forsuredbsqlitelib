@@ -18,7 +18,6 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.migration.MigrationSet;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -31,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.fsryan.forsuredb.sqlitelib.TestData.resourceText;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -53,21 +51,21 @@ public class MigrationSqlQueryTest {
         return Arrays.asList(new Object[][] {
                 {   // 00 ALTER TABLE ADD COLUMN
                         resourceText("alter_table_add_column_migration.json"),
-                        newArrayList("ALTER TABLE user ADD COLUMN global_id INTEGER;")
+                        Arrays.asList("ALTER TABLE user ADD COLUMN global_id INTEGER;")
                 },
                 {   // 01 CREATE TABLE
                         resourceText("create_table_migration.json"),
-                        newArrayList(
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0');",
+                        Arrays.asList(
+                                "CREATE TABLE profile_info(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;")
                 },
                 {   // 02 ADD FOREIGN KEY
                         resourceText("alter_table_add_foreign_key_migration.json"),
-                        newArrayList(
+                        Arrays.asList(
                                 "DROP TABLE IF EXISTS temp_profile_info;",
                                 "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, binary_data, email_address FROM profile_info;",
                                 "DROP TABLE IF EXISTS profile_info;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TABLE profile_info(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
                                 "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
@@ -76,25 +74,25 @@ public class MigrationSqlQueryTest {
                 },
                 {   // 03 CREATE TABLE with unique column
                         resourceText("create_table_migration_with_unique_column.json"),
-                        newArrayList(
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', uuid TEXT UNIQUE);",
+                        Arrays.asList(
+                                "CREATE TABLE profile_info(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, uuid TEXT UNIQUE);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "CREATE UNIQUE INDEX IF NOT EXISTS profile_info_uuid ON profile_info(uuid);")
                 },
                 {   // 04 create two tables, one with a non unique index and unique index, the other with a foreign key to the unique index column
                         resourceText("create_two_tables_one_has_foreign_key_to_other.json"),
-                        Lists.newArrayList(
-                                "CREATE TABLE test_table(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', unique_index_column TEXT UNIQUE);",
+                        Arrays.asList(
+                                "CREATE TABLE test_table(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, unique_index_column TEXT UNIQUE);",
                                 "CREATE TRIGGER test_table_updated_trigger AFTER UPDATE ON test_table BEGIN UPDATE test_table SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "CREATE UNIQUE INDEX IF NOT EXISTS test_table_unique_index_column ON test_table(unique_index_column);",
-                                "CREATE TABLE test_table2(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0');",
+                                "CREATE TABLE test_table2(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY);",
                                 "CREATE TRIGGER test_table2_updated_trigger AFTER UPDATE ON test_table2 BEGIN UPDATE test_table2 SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE test_table ADD COLUMN non_unique_index_column TEXT;",
                                 "CREATE INDEX IF NOT EXISTS test_table_non_unique_index_column ON test_table(non_unique_index_column);",
                                 "DROP TABLE IF EXISTS temp_test_table2;",
                                 "CREATE TEMP TABLE temp_test_table2 AS SELECT _id, created, deleted, modified FROM test_table2;",
                                 "DROP TABLE IF EXISTS test_table2;",
-                                "CREATE TABLE test_table2(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', test_table_unique_index_column TEXT, FOREIGN KEY(test_table_unique_index_column) REFERENCES test_table(unique_index_column) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TABLE test_table2(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, test_table_unique_index_column TEXT, FOREIGN KEY(test_table_unique_index_column) REFERENCES test_table(unique_index_column) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER test_table2_updated_trigger AFTER UPDATE ON test_table2 BEGIN UPDATE test_table2 SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "INSERT INTO test_table2 SELECT _id, created, deleted, modified, null AS test_table_unique_index_column FROM temp_test_table2;",
                                 "DROP TABLE IF EXISTS temp_test_table2;"
@@ -102,13 +100,13 @@ public class MigrationSqlQueryTest {
                 },
                 {   // 05 additional_data_table has foreign key to profile_info_table has foreign key to user_table
                     resourceText("three_table_zero_to_one_test.json"),
-                        Lists.newArrayList(
-                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0');",
-                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE _id=NEW._id; END;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0');",
-                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE _id=NEW._id; END;",
-                                "CREATE TABLE user(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0');",
-                                "CREATE TRIGGER user_updated_trigger AFTER UPDATE ON user BEGIN UPDATE user SET modified=STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE _id=NEW._id; END;",
+                        Arrays.asList(
+                                "CREATE TABLE additional_data(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY);",
+                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE profile_info(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY);",
+                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE user(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY);",
+                                "CREATE TRIGGER user_updated_trigger AFTER UPDATE ON user BEGIN UPDATE user SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE user ADD COLUMN app_rating REAL;",
                                 "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
                                 "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
@@ -122,8 +120,8 @@ public class MigrationSqlQueryTest {
                                 "DROP TABLE IF EXISTS temp_additional_data;",
                                 "CREATE TEMP TABLE temp_additional_data AS SELECT _id, created, deleted, modified, int_column, long_column, string_column FROM additional_data;",
                                 "DROP TABLE IF EXISTS additional_data;",
-                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0', profile_info_id INTEGER, FOREIGN KEY(profile_info_id) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
-                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE _id=NEW._id; END;",
+                                "CREATE TABLE additional_data(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, profile_info_id INTEGER, FOREIGN KEY(profile_info_id) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE additional_data ADD COLUMN int_column INTEGER;",
                                 "ALTER TABLE additional_data ADD COLUMN long_column INTEGER;",
                                 "ALTER TABLE additional_data ADD COLUMN string_column TEXT;",
@@ -132,8 +130,8 @@ public class MigrationSqlQueryTest {
                                 "DROP TABLE IF EXISTS temp_profile_info;",
                                 "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, awesome, binary_data, email_address FROM profile_info;",
                                 "DROP TABLE IF EXISTS profile_info;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0', user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
-                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW') WHERE _id=NEW._id; END;",
+                                "CREATE TABLE profile_info(deleted INTEGER DEFAULT '0', created DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), modified DATETIME DEFAULT(" + SqlGenerator.CURRENT_UTC_TIME + "), _id INTEGER PRIMARY KEY, user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
                                 "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
                                 "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
@@ -160,7 +158,10 @@ public class MigrationSqlQueryTest {
     @Test
     public void shouldMatchExpectedSqlExactly() {
         for (int i = 0; i < expectedSqlOutput.size(); i++) {
-            assertEquals("sql index: " + i, expectedSqlOutput.get(i), actualSqlOutput.get(i));
+            final String expected = expectedSqlOutput.get(i);
+            final String actual = actualSqlOutput.get(i);
+            final String message = "sql index: " + i + "\nexpected: " + expected + "\nactual:   " + actual + "\n";
+            assertEquals(message, expected, actual);
         }
     }
 
