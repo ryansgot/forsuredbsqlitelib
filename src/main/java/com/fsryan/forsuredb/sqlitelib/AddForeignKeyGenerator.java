@@ -112,7 +112,6 @@ public class AddForeignKeyGenerator extends QueryGenerator {
         StringBuffer buf = new StringBuffer("INSERT INTO ").append(getTableName()).append(" SELECT ");
         List<ColumnInfo> tableColumns = new LinkedList<>(table.getColumns());
         Collections.sort(tableColumns);
-        // append all of the previously existing columns first
         for (ColumnInfo tableColumn : tableColumns) {
             if (newForeignKeyColumns.contains(tableColumn)) {
                 buf.append(", null AS ").append(tableColumn.getColumnName());
@@ -120,7 +119,6 @@ public class AddForeignKeyGenerator extends QueryGenerator {
                 buf.append("_id".equals(tableColumn.getColumnName()) ? "" : ", ").append(tableColumn.getColumnName());
             }
         }
-        // append the new foreign key last
         return buf.append(" FROM ").append(tempTableName()).append(";").toString();
     }
 

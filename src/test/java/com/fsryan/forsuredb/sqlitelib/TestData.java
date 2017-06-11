@@ -55,6 +55,14 @@ public class TestData {
         return retMap;
     }
 
+    public static Map<String, TableInfo> tableMapOf(TableInfo... tables) {
+        Map<String, TableInfo> ret = new HashMap<>();
+        for (TableInfo table : tables) {
+            ret.put(table.getTableName(), table);
+        }
+        return ret;
+    }
+
     // Convenience methods for making data to go into the tests
     public static TableInfo.Builder table() {
         return TableInfo.builder().tableName(TABLE_NAME);

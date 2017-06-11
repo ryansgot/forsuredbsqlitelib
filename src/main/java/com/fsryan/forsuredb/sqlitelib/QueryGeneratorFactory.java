@@ -85,6 +85,8 @@ public class QueryGeneratorFactory {
                 return new AddColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case DROP_TABLE:
                 return new DropTableGenerator(migration.getTableName());
+            case UPDATE_PRIMARY_KEY:
+                return new UpdatePrimaryKeyGenerator(migration.getTableName(), targetSchema);
         }
 
         return emptyGenerator;

@@ -22,18 +22,25 @@ import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 public class CreateTableGenerator extends QueryGenerator {
 
     private final Map<String, TableInfo> targetSchema;
+    private final Set<String> primaryKey;
+    private final String primaryKeyOnConflict;
+    private final List<String> sortedPrimaryKeyColumnNames;
 
     public CreateTableGenerator(String tableName, Map<String, TableInfo> targetSchema) {
         super(tableName, Migration.Type.CREATE_TABLE);
         this.targetSchema = targetSchema;
+        TableInfo table = targetSchema.get(tableName);
+        primaryKey = table.getPrimaryKey();
+        primaryKeyOnConflict = table.getPrimaryKeyOnConflict();
+        sortedPrimaryKeyColumnNames = new ArrayList<>(primaryKey);
+        Collections.sort(sortedPrimaryKeyColumnNames);
     }
 
     @Override
@@ -47,27 +54,36 @@ public class CreateTableGenerator extends QueryGenerator {
 
     private String createTableQuery() {
         StringBuilder buf = new StringBuilder("CREATE TABLE ").append(getTableName()).append("(");
-        appendDefaultColumns(buf);
-        appendUniqueColumns(buf);
+        List<ColumnInfo> columnsToAdd = determineColumnsToAdd();
+        Collections.sort(columnsToAdd);
+        for (ColumnInfo column : columnsToAdd) {
+            buf.append(columnDefinition(column)).append(", ");
+        }
+        buf.delete(buf.length() - 2, buf.length());
+        if (primaryKey.size() > 1) {
+            buf.append(", PRIMARY KEY(");
+            for (String primaryKeyColumnName : sortedPrimaryKeyColumnNames) {
+                buf.append(primaryKeyColumnName).append(", ");
+            }
+            buf.delete(buf.length() - 2, buf.length()).append(')');
+            if (primaryKeyOnConflict != null && !primaryKeyOnConflict.isEmpty()) {
+                buf.append(" ON CONFLICT ").append(primaryKeyOnConflict);
+            }
+        }
         return buf.append(");").toString();
     }
 
-    private void appendDefaultColumns(StringBuilder buf) {
-        int startingLength = buf.length();
-        for (ColumnInfo column : TableInfo.DEFAULT_COLUMNS.values()) {
-            if (startingLength != buf.length()) {
-                buf.append(", ");
-            }
-            buf.append(columnDefinition(column));
-        }
-    }
-
-    private void appendUniqueColumns(StringBuilder buf) {
+    private List<ColumnInfo> determineColumnsToAdd() {
+        List<ColumnInfo> ret = new ArrayList<>(TableInfo.DEFAULT_COLUMNS.values());
         for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
-            if (column.isUnique()) {
-                buf.append(", ").append(columnDefinition(column));
+            if (column.getColumnName().equals(TableInfo.DEFAULT_PRIMARY_KEY_COLUMN)) {
+                continue;
+            }
+            if (column.isUnique() || primaryKey.contains(column.getColumnName())) {
+                ret.add(column);
             }
         }
+        return ret;
     }
 
     private List<String> uniqueIndexQueries() {
@@ -84,7 +100,7 @@ public class CreateTableGenerator extends QueryGenerator {
     private String columnDefinition(ColumnInfo column) {
         return column.getColumnName()
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
-                + (column.isPrimaryKey() ? " PRIMARY KEY" : "")
+                + (primaryKey.size() == 1 && primaryKey.contains(column.getColumnName()) ? " PRIMARY KEY" + (primaryKeyOnConflict == null || primaryKeyOnConflict.isEmpty() ? "" : " ON CONFLICT " + primaryKeyOnConflict): "")
                 + (column.isUnique() ? " UNIQUE" : "")
                 + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "");
     }
@@ -94,12 +110,20 @@ public class CreateTableGenerator extends QueryGenerator {
         if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
             return " '" + column.getDefaultValue() + "'";
         }
-        return "(" + SqlGenerator.CURRENT_UTC_TIME + ")";
+        return "(" + CURRENT_UTC_TIME + ")";
     }
 
     private String modifiedTriggerQuery() {
         return "CREATE TRIGGER "
                 + getTableName() + "_updated_trigger AFTER UPDATE ON " + getTableName()
-                + " BEGIN UPDATE " + getTableName() + " SET modified=" + SqlGenerator.CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;";
+                + " BEGIN UPDATE " + getTableName() + " SET modified=" + CURRENT_UTC_TIME + " WHERE " + primaryKeyWhere() + "; END;";
+    }
+
+    private String primaryKeyWhere() {
+        StringBuilder buf = new StringBuilder();
+        for (String columnName : sortedPrimaryKeyColumnNames) {
+            buf.append(columnName).append("=NEW.").append(columnName).append(" AND ");
+        }
+        return buf.delete(buf.length() - 5, buf.length()).toString();
     }
 }
