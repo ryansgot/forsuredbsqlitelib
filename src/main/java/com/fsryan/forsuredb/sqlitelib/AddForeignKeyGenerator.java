@@ -24,6 +24,13 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.*;
 
+/**
+ * <p>
+ *     For backwards compatibilty with forsuredbcompiler versions that produce
+ *     {@link Migration.Type#ADD_FOREIGN_KEY_REFERENCE} migrations.
+ * </p>
+ */
+@Deprecated
 public class AddForeignKeyGenerator extends QueryGenerator {
 
     private final TableInfo table;
@@ -71,7 +78,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private List<String> recreateTableWithAllForeignKeysQuery() {
         final List<String> retList = new LinkedList<>();
-        List<String> normalCreationQueries = new CreateTableGenerator(getTableName(), targetSchema).generate();
+        List<String> normalCreationQueries = new LegacyCreateTableGenerator(getTableName(), targetSchema).generate();
 
         // add the default columns to the normal TABLE CREATE query
         StringBuffer buf = new StringBuffer(normalCreationQueries.remove(0));

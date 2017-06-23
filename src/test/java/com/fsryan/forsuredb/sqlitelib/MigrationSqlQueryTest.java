@@ -60,7 +60,7 @@ public class MigrationSqlQueryTest {
                                 "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;")
                 },
-                {   // 02 ADD FOREIGN KEY
+                {   // 02 ADD FOREIGN KEY; legacy foreign key
                         resourceText("alter_table_add_foreign_key_migration.json"),
                         Arrays.asList(
                                 "DROP TABLE IF EXISTS temp_profile_info;",
@@ -80,7 +80,7 @@ public class MigrationSqlQueryTest {
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "CREATE UNIQUE INDEX IF NOT EXISTS profile_info_uuid ON profile_info(uuid);")
                 },
-                {   // 04 create two tables, one with a non unique index and unique index, the other with a foreign key to the unique index column
+                {   // 04 create two tables, one with a non unique index and unique index, the other with a foreign key to the unique index column; legacy foreign key
                         resourceText("create_two_tables_one_has_foreign_key_to_other.json"),
                         Arrays.asList(
                                 "CREATE TABLE test_table(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), unique_index_column TEXT UNIQUE);",
@@ -99,8 +99,8 @@ public class MigrationSqlQueryTest {
                                 "DROP TABLE IF EXISTS temp_test_table2;"
                         )
                 },
-                {   // 05 additional_data_table has foreign key to profile_info_table has foreign key to user_table
-                    resourceText("three_table_zero_to_one_test.json"),
+                {   // 05 additional_data_table has foreign key to profile_info_table has foreign key to user_table; legacy foreign key
+                        resourceText("three_table_zero_to_one_test.json"),
                         Arrays.asList(
                                 "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
                                 "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
@@ -138,6 +138,27 @@ public class MigrationSqlQueryTest {
                                 "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
                                 "INSERT INTO profile_info SELECT _id, created, deleted, modified, null AS user_id, awesome, binary_data, email_address FROM temp_profile_info;",
                                 "DROP TABLE IF EXISTS temp_profile_info;"
+                        )
+                },
+                {   // 06 same as 05, but with TableForeignKeyInfo instead of legacy foreign key
+                        resourceText("three_table_zero_to_one_test_update_foreign_keys.json"),
+                        Arrays.asList(
+                                "CREATE TABLE user(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TRIGGER user_updated_trigger AFTER UPDATE ON user BEGIN UPDATE user SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
+                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), profile_info_id INTEGER, FOREIGN KEY(profile_info_id) REFERENCES profile_info(_id));",
+                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "ALTER TABLE user ADD COLUMN app_rating REAL;",
+                                "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
+                                "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
+                                "ALTER TABLE user ADD COLUMN competitor_app_rating REAL;",
+                                "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
+                                "ALTER TABLE user ADD COLUMN global_id INTEGER;",
+                                "ALTER TABLE additional_data ADD COLUMN int_column INTEGER;",
+                                "ALTER TABLE user ADD COLUMN login_count INTEGER;",
+                                "ALTER TABLE additional_data ADD COLUMN long_column INTEGER;",
+                                "ALTER TABLE additional_data ADD COLUMN string_column TEXT;"
                         )
                 }
         });

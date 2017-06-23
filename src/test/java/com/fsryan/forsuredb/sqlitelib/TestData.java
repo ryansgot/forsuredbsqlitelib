@@ -26,8 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TestData {
 
@@ -45,6 +44,20 @@ public class TestData {
         }
         br.close();
         return out.toString();
+    }
+
+    public static <T> Set<T> setOf(T... ts) {
+        return new HashSet<>(Arrays.asList(ts));
+    }
+
+    public static Set<String> defaultColumnSet() {
+        return setOf("created", "deleted", "modified", "_id");
+    }
+
+    public static Set<String> defaultColumnsWith(String... columnNames) {
+        Set<String> ret = defaultColumnSet();
+        ret.addAll(Arrays.asList(columnNames));
+        return ret;
     }
 
     public static Map<String, ColumnInfo> columnMapOf(ColumnInfo... columns) {

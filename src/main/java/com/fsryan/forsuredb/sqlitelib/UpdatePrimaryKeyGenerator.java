@@ -7,6 +7,8 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.*;
 
+import static com.fsryan.forsuredb.sqlitelib.QueryGeneratorSelector.createTableGeneratorFor;
+
 public class UpdatePrimaryKeyGenerator extends QueryGenerator {
 
     private final Map<String, TableInfo> targetSchema;
@@ -24,7 +26,7 @@ public class UpdatePrimaryKeyGenerator extends QueryGenerator {
         final List<String> ret = new ArrayList<>();
         ret.addAll(new CreateTempTableFromExisting(targetTable).generate());
         ret.addAll(new DropTableGenerator(getTableName()).generate());
-        ret.addAll(new CreateTableGenerator(getTableName(), targetSchema).generate());
+        ret.addAll(createTableGeneratorFor(targetTable, targetSchema).generate());
         for (ColumnInfo column : targetTable.getNonForeignKeyColumns()) {
             if (TableInfo.DEFAULT_COLUMNS.containsKey(column.getColumnName()) || column.isUnique() || primaryKey.contains(column.getColumnName())) {
                 continue;

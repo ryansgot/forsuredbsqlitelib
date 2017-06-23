@@ -18,16 +18,18 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Type;
+import java.util.*;
+
+import static com.fsryan.forsuredb.sqlitelib.QueryGeneratorSelector.createTableGeneratorFor;
 
 /**
  * <p>
@@ -44,6 +46,7 @@ public class QueryGeneratorFactory {
             return new ArrayList<>();
         }
     };
+    private static final Gson gson = new Gson();
 
     // tableName -> list of column names that are NEW foreign key columns--not existing
     private final Map<String, List<String>> newForeignKeyColumnMap;
@@ -65,7 +68,7 @@ public class QueryGeneratorFactory {
 
         switch (migration.getType()) {
             case CREATE_TABLE:
-                return new CreateTableGenerator(table.getTableName(), targetSchema);
+                return createTableGeneratorFor(table, targetSchema);
             case ADD_FOREIGN_KEY_REFERENCE:
                 List<String> allForeignKeys = newForeignKeyColumnMap.remove(migration.getTableName());
                 if (allForeignKeys == null) {   // <-- migration has already been run that creates all foreign keys
@@ -87,6 +90,14 @@ public class QueryGeneratorFactory {
                 return new DropTableGenerator(migration.getTableName());
             case UPDATE_PRIMARY_KEY:
                 return new UpdatePrimaryKeyGenerator(migration.getTableName(), targetSchema);
+            case UPDATE_FOREIGN_KEYS:
+                final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
+                final String currentForeignKeysJson = migration.getExtras().get(migration.getExtras().get("current_foreign_keys"));
+                final Set<TableForeignKeyInfo> currentForeignKeys = gson.fromJson(currentForeignKeysJson, tableForeignKeysInfoSetType);
+                final Type stringSetType = new TypeToken<Set<String>>() {}.getType();
+                final String currentColumnsJson = migration.getExtras().get("existing_column_names");
+                final Set<String> currentColumns = gson.fromJson(currentColumnsJson, stringSetType);
+                return new UpdateForeignKeysGenerator(table.getTableName(), currentForeignKeys, currentColumns, targetSchema);
         }
 
         return emptyGenerator;

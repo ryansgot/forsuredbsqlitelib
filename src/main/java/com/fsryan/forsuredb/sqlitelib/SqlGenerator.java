@@ -30,6 +30,11 @@ public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final String CHANGE_ACTION_NO_ACTION = "NO ACTION";
+    public static final String CHANGE_ACTION_RESTRICT = "RESTRICT";
+    public static final String CHANGE_ACTION_SET_NULL = "SET NULL";
+    public static final String CHANGE_ACTION_SET_DEFAULT = "SET DEFAULT";
+    public static final String CHANGE_ACTION_CASCADE = "CASCADE";
 
     // visible for testing
     /*package*/ static final String EMPTY_SQL = ";";
