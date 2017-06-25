@@ -50,12 +50,12 @@ public class TestData {
         return new HashSet<>(Arrays.asList(ts));
     }
 
-    public static Set<String> defaultColumnSet() {
+    public static Set<String> defaultColumnNameSet() {
         return setOf("created", "deleted", "modified", "_id");
     }
 
-    public static Set<String> defaultColumnsWith(String... columnNames) {
-        Set<String> ret = defaultColumnSet();
+    public static Set<String> defaultColumnNamesWith(String... columnNames) {
+        Set<String> ret = defaultColumnNameSet();
         ret.addAll(Arrays.asList(columnNames));
         return ret;
     }
