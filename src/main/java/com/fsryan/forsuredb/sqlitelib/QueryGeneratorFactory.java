@@ -22,7 +22,6 @@ import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
-import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +113,9 @@ public class QueryGeneratorFactory {
             }
             List<String> newForeignKeyColumns = retMap.get(m.getTableName());
             if (newForeignKeyColumns == null) {
-                retMap.put(m.getTableName(), Lists.newArrayList(m.getColumnName()));
+                List<String> columnNames = new ArrayList<>();
+                columnNames.add(m.getColumnName());
+                retMap.put(m.getTableName(), columnNames);
             } else {
                 newForeignKeyColumns.add(m.getColumnName());
             }

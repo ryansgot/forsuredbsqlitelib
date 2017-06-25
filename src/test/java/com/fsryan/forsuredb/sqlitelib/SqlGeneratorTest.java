@@ -1,6 +1,5 @@
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +9,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import static com.fsryan.forsuredb.sqlitelib.CollectionUtil.stringMapOf;
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.EMPTY_SQL;
 import static com.fsryan.forsuredb.sqlitelib.TestData.TABLE_NAME;
 import static org.junit.Assert.assertEquals;
@@ -37,15 +37,12 @@ public class SqlGeneratorTest {
             return Arrays.asList(new Object[][] {
                     {   // 00: empty input map
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .build(),
+                            stringMapOf(),
                             EMPTY_SQL
                     },
                     {   // 01: empty input table name
                             "",
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("col1", "val1")
-                                    .build(),
+                            stringMapOf("col1", "val1"),
                             EMPTY_SQL
                     },
                     {   // 02: null input map
@@ -55,70 +52,54 @@ public class SqlGeneratorTest {
                     },
                     {   // 03: null input table name
                             null,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("col1", "val1")
-                                    .build(),
+                            stringMapOf("col1", "val1"),
                             EMPTY_SQL
                     },
                     {   // 04: null input table name
                             null,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("col1", "val1")
-                                    .build(),
+                            stringMapOf("col1", "val1"),
                             EMPTY_SQL
                     },
                     {   // 05: valid args, one column and one value
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("col1", "val1")
-                                    .build(),
+                            stringMapOf("col1", "val1"),
                             "INSERT INTO test_table (col1) VALUES ('val1');"
                     },
                     {   // 06: valid args, two columns and two values
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("col1", "val1")
-                                    .put("col2", "val2")
-                                    .build(),
-                            "INSERT INTO test_table (col1, col2) VALUES ('val1', 'val2');"
+                            stringMapOf("col1", "val1",
+                                    "col2", "val2"),
+                            "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 07: valid args, attempt to insert an _id
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("_id", "12345")
-                                    .put("col1", "val1")
-                                    .put("col2", "val2")
-                                    .build(),
-                            "INSERT INTO test_table (col1, col2) VALUES ('val1', 'val2');"
+                            stringMapOf("_id", "12345",
+                                    "col1", "val1",
+                                    "col2", "val2"),
+                            "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 08: valid args, attempt to insert modified
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("modified", new Date().toString())
-                                    .put("col1", "val1")
-                                    .put("col2", "val2")
-                                    .build(),
-                            "INSERT INTO test_table (col1, col2) VALUES ('val1', 'val2');"
+                            stringMapOf("modified", new Date().toString(),
+                                    "col1", "val1",
+                                    "col2", "val2"),
+                            "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 09: valid args, attempt to insert created
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("created", new Date().toString())
-                                    .put("col1", "val1")
-                                    .put("col2", "val2")
-                                    .build(),
-                            "INSERT INTO test_table (col1, col2) VALUES ('val1', 'val2');"
+                            stringMapOf("created", new Date().toString(),
+                                    "col1", "val1",
+                                    "col2", "val2"),
+                            "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 10: valid args, attempt to insert _id, created, modified
                             TABLE_NAME,
-                            new ImmutableMap.Builder<String, String>()
-                                    .put("_id", "12345")
-                                    .put("created", new Date().toString())
-                                    .put("modified", new Date().toString())
-                                    .put("col1", "val1")
-                                    .put("col2", "val2")
-                                    .build(),
-                            "INSERT INTO test_table (col1, col2) VALUES ('val1', 'val2');"
+                            stringMapOf("_id", "12345",
+                                    "created", new Date().toString(),
+                                    "modified", new Date().toString(),
+                                    "col1", "val1",
+                                    "col2", "val2"),
+                            "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     }
             });
         }
