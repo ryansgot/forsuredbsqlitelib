@@ -88,16 +88,15 @@ public class QueryGeneratorFactory {
                 return new AddColumnGenerator(table.getTableName(), table.getColumn(migration.getColumnName()));
             case DROP_TABLE:
                 return new DropTableGenerator(migration.getTableName());
+            case CHANGE_DEFAULT_VALUE:
+                return new ChangeDefaultValueGenerator(migration.getTableName(), targetSchema);
             case UPDATE_PRIMARY_KEY:
-                return new UpdatePrimaryKeyGenerator(migration.getTableName(), targetSchema);
+                return new UpdatePrimaryKeyGenerator(migration.getTableName(), existingColumnNamesFrom(migration), targetSchema);
             case UPDATE_FOREIGN_KEYS:
                 final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
                 final String currentForeignKeysJson = migration.getExtras().get(migration.getExtras().get("current_foreign_keys"));
                 final Set<TableForeignKeyInfo> currentForeignKeys = gson.fromJson(currentForeignKeysJson, tableForeignKeysInfoSetType);
-                final Type stringSetType = new TypeToken<Set<String>>() {}.getType();
-                final String currentColumnsJson = migration.getExtras().get("existing_column_names");
-                final Set<String> currentColumns = gson.fromJson(currentColumnsJson, stringSetType);
-                return new UpdateForeignKeysGenerator(table.getTableName(), currentForeignKeys, currentColumns, targetSchema);
+                return new UpdateForeignKeysGenerator(table.getTableName(), currentForeignKeys, existingColumnNamesFrom(migration), targetSchema);
         }
 
         return emptyGenerator;
@@ -143,5 +142,17 @@ public class QueryGeneratorFactory {
             retList.add(table.getColumn(columnName));
         }
         return retList;
+    }
+
+    private static Set<String> existingColumnNamesFrom(Migration migration) {
+        final String currentColumnsJson = migration.getExtras().get("existing_column_names");
+        if (currentColumnsJson == null) {
+            Set<String> ret = new HashSet<>();
+            for (ColumnInfo column : TableInfo.DEFAULT_COLUMNS.values()) {
+                ret.add(column.getColumnName());
+            }
+            return ret;
+        }
+        return gson.fromJson(currentColumnsJson, new TypeToken<Set<String>>() {}.getType());
     }
 }

@@ -36,6 +36,14 @@ public class SqlGenerator implements DBMSIntegrator {
     public static final String CHANGE_ACTION_SET_DEFAULT = "SET DEFAULT";
     public static final String CHANGE_ACTION_CASCADE = "CASCADE";
 
+    /*package*/ static final Set<Migration.Type> TYPES_REQUIRING_TABLE_RECREATION = new HashSet<>(4);
+    static {
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.CREATE_TABLE);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.CHANGE_DEFAULT_VALUE);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.UPDATE_FOREIGN_KEYS);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.UPDATE_PRIMARY_KEY);
+    }
+
     // visible for testing
     /*package*/ static final String EMPTY_SQL = ";";
     private static final Set<String> columnExclusionFilter = new HashSet<>(Arrays.asList("_id", "created", "modified"));
@@ -49,8 +57,17 @@ public class SqlGenerator implements DBMSIntegrator {
         }
 
         QueryGeneratorFactory qgf = new QueryGeneratorFactory(migrationSet);
+        List<Migration> migrations = migrationSet.getOrderedMigrations();
+        Collections.sort(migrations, new MigrationComparator(migrationSet.getTargetSchema()));
         List<String> sqlList = new ArrayList<>();
-        for (Migration m : migrationSet.getOrderedMigrations()) {
+        Set<String> recreatedTables = new HashSet<>();
+        for (Migration m : migrations) {
+            if (TYPES_REQUIRING_TABLE_RECREATION.contains(m.getType())) {
+                if (recreatedTables.contains(m.getTableName())) {
+                    continue;
+                }
+                recreatedTables.add(m.getTableName());
+            }
             sqlList.addAll(qgf.getFor(m, migrationSet.getTargetSchema()).generate());
         }
 

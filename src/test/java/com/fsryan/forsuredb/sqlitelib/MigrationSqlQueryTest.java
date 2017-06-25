@@ -102,12 +102,12 @@ public class MigrationSqlQueryTest {
                 {   // 05 additional_data_table has foreign key to profile_info_table has foreign key to user_table; legacy foreign key
                         resourceText("three_table_zero_to_one_test.json"),
                         Arrays.asList(
-                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
-                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
-                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "CREATE TABLE user(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
                                 "CREATE TRIGGER user_updated_trigger AFTER UPDATE ON user BEGIN UPDATE user SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
+                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE user ADD COLUMN app_rating REAL;",
                                 "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
                                 "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
@@ -160,7 +160,7 @@ public class MigrationSqlQueryTest {
                                 "ALTER TABLE additional_data ADD COLUMN long_column INTEGER;",
                                 "ALTER TABLE additional_data ADD COLUMN string_column TEXT;"
                         )
-                }
+                },
         });
     }
 

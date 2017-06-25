@@ -1,14 +1,14 @@
 {
   "ordered_migrations": [{
-    "table_name": "user",
+    "table_name": "additional_data",
     "migration_type": "CREATE_TABLE"
   },{
     "table_name": "profile_info",
     "migration_type": "CREATE_TABLE"
-  },{
-    "table_name": "additional_data",
-    "migration_type": "CREATE_TABLE"
   }, {
+    "table_name": "user",
+    "migration_type": "CREATE_TABLE"
+  },{
     "table_name": "user",
     "column_name": "app_rating",
     "migration_type": "ALTER_TABLE_ADD_COLUMN"

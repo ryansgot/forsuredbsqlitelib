@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 import static com.fsryan.forsuredb.sqlitelib.TestData.*;
 
 @RunWith(Parameterized.class)
@@ -60,7 +59,7 @@ public class UpdateForeignKeysGeneratorTest extends BaseSQLiteGeneratorTest {
                 {   // 00: add a composite foreign key
                         "referencing_table",
                         Collections.<TableForeignKeyInfo>emptySet(),
-                        defaultColumnSet(),
+                        defaultColumnNameSet(),
                         tableMapOf(
                                 table().tableName("referenced_table")
                                         .qualifiedClassName(UpdateForeignKeysGeneratorTest.class.getName())
