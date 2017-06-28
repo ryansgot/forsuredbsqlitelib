@@ -73,22 +73,14 @@ public class CreateTableGenerator extends QueryGenerator {
             }
         }
 
-        boolean addedForeignKey = false;
         if (foreignKeySet == null) {
             for (ColumnInfo column : table.getForeignKeyColumns()) {
                 addForeignKeyReferenceTo(buf, column.getForeignKeyInfo(), column.getColumnName());
-                buf.append(", ");
-                addedForeignKey = true;
             }
         } else {
             for (TableForeignKeyInfo foreignKey : foreignKeySet) {
                 addForeignKeyReferenceTo(buf, foreignKey);
-                buf.append(", ");
-                addedForeignKey = true;
             }
-        }
-        if (addedForeignKey) {
-            buf.delete(buf.length() - 2, buf.length());
         }
 
         return buf.append(");").toString();
