@@ -18,6 +18,7 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.Finder;
+import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.sqlgeneration.DBMSIntegrator;
@@ -62,10 +63,10 @@ public class SqlGenerator implements DBMSIntegrator {
         List<String> sqlList = new ArrayList<>();
         Set<String> recreatedTables = new HashSet<>();
         for (Migration m : migrations) {
+            if (recreatedTables.contains(m.getTableName()) && isMigrationHandledOnCreate(m, migrationSet.getTargetSchema())) {
+                continue;
+            }
             if (TYPES_REQUIRING_TABLE_RECREATION.contains(m.getType())) {
-                if (recreatedTables.contains(m.getTableName())) {
-                    continue;
-                }
                 recreatedTables.add(m.getTableName());
             }
             sqlList.addAll(qgf.getFor(m, migrationSet.getTargetSchema()).generate());
@@ -167,5 +168,20 @@ public class SqlGenerator implements DBMSIntegrator {
     @Override
     public String orKeyword() {
         return "OR";
+    }
+
+    private static boolean isMigrationHandledOnCreate(Migration m, Map<String, TableInfo> targetSchema) {
+        switch (m.getType()) {
+            case ADD_UNIQUE_INDEX:
+                // intentionally falling through
+            case ADD_FOREIGN_KEY_REFERENCE:
+                return true;
+            case ALTER_TABLE_ADD_COLUMN:
+                TableInfo table = targetSchema.get(m.getTableName());
+                return table.isForeignKeyColumn(m.getColumnName())
+                        || table.getPrimaryKey().contains(m.getColumnName())
+                        || table.getColumn(m.getColumnName()).isUnique();
+        }
+        return false;
     }
 }

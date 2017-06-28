@@ -28,7 +28,8 @@ import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 /**
  * <p>
- *     Depends upon foreign keys and primary key being marked on the columns
+ *     Depends upon foreign keys and primary key being marked on the columns.
+ *     Only used by deprecated {@link AddForeignKeyGenerator}
  * </p>
  */
 @Deprecated

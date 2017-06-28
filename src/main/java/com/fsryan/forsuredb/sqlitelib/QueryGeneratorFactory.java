@@ -29,8 +29,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static com.fsryan.forsuredb.sqlitelib.QueryGeneratorSelector.createTableGeneratorFor;
-
 /**
  * <p>
  *     QueryGeneratorFactory is intended to create all of the {@link QueryGenerator} objects that generate the
@@ -68,7 +66,7 @@ public class QueryGeneratorFactory {
 
         switch (migration.getType()) {
             case CREATE_TABLE:
-                return createTableGeneratorFor(table, targetSchema);
+                return new CreateTableGenerator(migration.getTableName(), targetSchema);
             case ADD_FOREIGN_KEY_REFERENCE:
                 List<String> allForeignKeys = newForeignKeyColumnMap.remove(migration.getTableName());
                 if (allForeignKeys == null) {   // <-- migration has already been run that creates all foreign keys
