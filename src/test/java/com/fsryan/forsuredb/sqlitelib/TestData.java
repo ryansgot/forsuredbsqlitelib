@@ -26,8 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TestData {
 
@@ -47,12 +46,34 @@ public class TestData {
         return out.toString();
     }
 
+    public static <T> Set<T> setOf(T... ts) {
+        return new HashSet<>(Arrays.asList(ts));
+    }
+
+    public static Set<String> defaultColumnNameSet() {
+        return setOf("created", "deleted", "modified", "_id");
+    }
+
+    public static Set<String> defaultColumnNamesWith(String... columnNames) {
+        Set<String> ret = defaultColumnNameSet();
+        ret.addAll(Arrays.asList(columnNames));
+        return ret;
+    }
+
     public static Map<String, ColumnInfo> columnMapOf(ColumnInfo... columns) {
         Map<String, ColumnInfo> retMap = new HashMap<>();
         for (ColumnInfo column : columns) {
             retMap.put(column.getColumnName(), column);
         }
         return retMap;
+    }
+
+    public static Map<String, TableInfo> tableMapOf(TableInfo... tables) {
+        Map<String, TableInfo> ret = new HashMap<>();
+        for (TableInfo table : tables) {
+            ret.put(table.getTableName(), table);
+        }
+        return ret;
     }
 
     // Convenience methods for making data to go into the tests

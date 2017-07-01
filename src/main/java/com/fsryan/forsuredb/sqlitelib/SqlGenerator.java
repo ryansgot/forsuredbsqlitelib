@@ -18,30 +18,36 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.Finder;
+import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.sqlgeneration.DBMSIntegrator;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import java.util.*;
 
 public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final String CHANGE_ACTION_NO_ACTION = "NO ACTION";
+    public static final String CHANGE_ACTION_RESTRICT = "RESTRICT";
+    public static final String CHANGE_ACTION_SET_NULL = "SET NULL";
+    public static final String CHANGE_ACTION_SET_DEFAULT = "SET DEFAULT";
+    public static final String CHANGE_ACTION_CASCADE = "CASCADE";
 
-    @VisibleForTesting
+    /*package*/ static final Set<Migration.Type> TYPES_REQUIRING_TABLE_RECREATION = new HashSet<>(4);
+    static {
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.CREATE_TABLE);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.CHANGE_DEFAULT_VALUE);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.UPDATE_FOREIGN_KEYS);
+        TYPES_REQUIRING_TABLE_RECREATION.add(Migration.Type.UPDATE_PRIMARY_KEY);
+    }
+
+    // visible for testing
     /*package*/ static final String EMPTY_SQL = ";";
-    private static final Set<String> columnExclusionFilter = Sets.newHashSet("_id", "created", "modified");
+    private static final Set<String> columnExclusionFilter = new HashSet<>(Arrays.asList("_id", "created", "modified"));
 
     public SqlGenerator() {}
 
@@ -52,8 +58,17 @@ public class SqlGenerator implements DBMSIntegrator {
         }
 
         QueryGeneratorFactory qgf = new QueryGeneratorFactory(migrationSet);
+        List<Migration> migrations = migrationSet.getOrderedMigrations();
+        Collections.sort(migrations, new MigrationComparator(migrationSet.getTargetSchema()));
         List<String> sqlList = new ArrayList<>();
-        for (Migration m : migrationSet.getOrderedMigrations()) {
+        Set<String> recreatedTables = new HashSet<>();
+        for (Migration m : migrations) {
+            if (recreatedTables.contains(m.getTableName()) && isMigrationHandledOnCreate(m, migrationSet.getTargetSchema())) {
+                continue;
+            }
+            if (TYPES_REQUIRING_TABLE_RECREATION.contains(m.getType())) {
+                recreatedTables.add(m.getTableName());
+            }
             sqlList.addAll(qgf.getFor(m, migrationSet.getTargetSchema()).generate());
         }
 
@@ -62,7 +77,7 @@ public class SqlGenerator implements DBMSIntegrator {
 
     @Override
     public String newSingleRowInsertionSql(String tableName, Map<String, String> columnValueMap) {
-        if (isNullOrEmpty(tableName) || columnValueMap == null || columnValueMap.isEmpty()) {
+        if (tableName == null || tableName.isEmpty() || columnValueMap == null || columnValueMap.isEmpty()) {
             return EMPTY_SQL;
         }
 
@@ -75,7 +90,7 @@ public class SqlGenerator implements DBMSIntegrator {
                 continue;   // <-- never insert _id, created, or modified columns
             }
             final String val = colValEntry.getValue();
-            if (!isNullOrEmpty(val)) {
+            if (val != null && !val.isEmpty()) {
                 queryBuf.append(columnName).append(", ");
                 valueBuf.append("'").append(val).append("', ");
             }
@@ -153,5 +168,20 @@ public class SqlGenerator implements DBMSIntegrator {
     @Override
     public String orKeyword() {
         return "OR";
+    }
+
+    private static boolean isMigrationHandledOnCreate(Migration m, Map<String, TableInfo> targetSchema) {
+        switch (m.getType()) {
+            case ADD_UNIQUE_INDEX:
+                // intentionally falling through
+            case ADD_FOREIGN_KEY_REFERENCE:
+                return true;
+            case ALTER_TABLE_ADD_COLUMN:
+                TableInfo table = targetSchema.get(m.getTableName());
+                return table.isForeignKeyColumn(m.getColumnName())
+                        || table.getPrimaryKey().contains(m.getColumnName())
+                        || table.getColumn(m.getColumnName()).isUnique();
+        }
+        return false;
     }
 }

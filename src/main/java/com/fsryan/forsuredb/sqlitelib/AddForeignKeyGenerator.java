@@ -21,13 +21,16 @@ import com.fsryan.forsuredb.api.info.ColumnInfo;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
-import com.google.common.collect.Lists;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+/**
+ * <p>
+ *     For backwards compatibilty with forsuredbcompiler versions that produce
+ *     {@link Migration.Type#ADD_FOREIGN_KEY_REFERENCE} migrations.
+ * </p>
+ */
+@Deprecated
 public class AddForeignKeyGenerator extends QueryGenerator {
 
     private final TableInfo table;
@@ -42,7 +45,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
      * @param column the foreign key column to add
      */
     public AddForeignKeyGenerator(TableInfo table, ColumnInfo column, Map<String, TableInfo> targetSchema) {
-        this(table, Lists.newArrayList(column), targetSchema);
+        this(table, new ArrayList<>(Arrays.asList(column)), targetSchema);
     }
 
     /**
@@ -75,7 +78,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private List<String> recreateTableWithAllForeignKeysQuery() {
         final List<String> retList = new LinkedList<>();
-        List<String> normalCreationQueries = new CreateTableGenerator(getTableName(), targetSchema).generate();
+        List<String> normalCreationQueries = new LegacyCreateTableGenerator(getTableName(), targetSchema).generate();
 
         // add the default columns to the normal TABLE CREATE query
         StringBuffer buf = new StringBuffer(normalCreationQueries.remove(0));
@@ -116,7 +119,6 @@ public class AddForeignKeyGenerator extends QueryGenerator {
         StringBuffer buf = new StringBuffer("INSERT INTO ").append(getTableName()).append(" SELECT ");
         List<ColumnInfo> tableColumns = new LinkedList<>(table.getColumns());
         Collections.sort(tableColumns);
-        // append all of the previously existing columns first
         for (ColumnInfo tableColumn : tableColumns) {
             if (newForeignKeyColumns.contains(tableColumn)) {
                 buf.append(", null AS ").append(tableColumn.getColumnName());
@@ -124,7 +126,6 @@ public class AddForeignKeyGenerator extends QueryGenerator {
                 buf.append("_id".equals(tableColumn.getColumnName()) ? "" : ", ").append(tableColumn.getColumnName());
             }
         }
-        // append the new foreign key last
         return buf.append(" FROM ").append(tempTableName()).append(";").toString();
     }
 

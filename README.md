@@ -3,6 +3,12 @@ Current build status: [![CircleCI](https://circleci.com/gh/ryansgot/forsuredbsql
 
 
 ## Revisions
+
+###
+- Support for composite keys
+- Support for default value
+- Removed dependency upon google guava
+
 ### 0.4.0
 - Integration with forsuredbapi-0.9.0--specifically regarding the ```DBMSIntegrator``` interface.
 
