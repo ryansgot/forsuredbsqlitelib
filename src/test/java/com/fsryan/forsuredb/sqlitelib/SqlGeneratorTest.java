@@ -67,29 +67,22 @@ public class SqlGeneratorTest {
                     },
                     {   // 06: valid args, two columns and two values
                             TABLE_NAME,
-                            stringMapOf("col1", "val1",
-                                    "col2", "val2"),
+                            stringMapOf("col2", "val2", "col1", "val1"),
                             "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 07: valid args, attempt to insert an _id
                             TABLE_NAME,
-                            stringMapOf("_id", "12345",
-                                    "col1", "val1",
-                                    "col2", "val2"),
+                            stringMapOf("_id", "12345", "col2", "val2", "col1", "val1"),
                             "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 08: valid args, attempt to insert modified
                             TABLE_NAME,
-                            stringMapOf("modified", new Date().toString(),
-                                    "col1", "val1",
-                                    "col2", "val2"),
+                            stringMapOf("modified", new Date().toString(), "col2", "val2", "col1", "val1"),
                             "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 09: valid args, attempt to insert created
                             TABLE_NAME,
-                            stringMapOf("created", new Date().toString(),
-                                    "col1", "val1",
-                                    "col2", "val2"),
+                            stringMapOf("created", new Date().toString(), "col2", "val2", "col1", "val1"),
                             "INSERT INTO test_table (col2, col1) VALUES ('val2', 'val1');"
                     },
                     {   // 10: valid args, attempt to insert _id, created, modified
