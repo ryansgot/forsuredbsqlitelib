@@ -1,6 +1,7 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.api.info.ColumnInfo;
+import com.fsryan.forsuredb.api.info.ForeignKeyInfo;
 import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
@@ -23,16 +24,22 @@ public class CreateTableGenerator extends QueryGenerator {
         super(tableName, Migration.Type.CREATE_TABLE);
         table = targetSchema.get(tableName);
         this.targetSchema = targetSchema;
-        isCompositePrimaryKey = table.getPrimaryKey() != null && table.getPrimaryKey().size() > 1;
-        foreignKeySet = table.getForeignKeys() == null
-                ? Collections.<TableForeignKeyInfo>emptySet()
-                : table.getForeignKeys();
-        for (TableForeignKeyInfo foreignKey : foreignKeySet) {
-            for (String columnName : foreignKey.getLocalToForeignColumnMap().keySet()) {
-                foreignKeyColumnNames.add(columnName);
+
+        foreignKeySet = table.getForeignKeys();
+        if (foreignKeySet == null) {
+            for (ColumnInfo column : table.getForeignKeyColumns()) {
+                foreignKeyColumnNames.add(column.getColumnName());
+            }
+        } else {
+            for (TableForeignKeyInfo foreignKey : foreignKeySet) {
+                for (String columnName : foreignKey.getLocalToForeignColumnMap().keySet()) {
+                    foreignKeyColumnNames.add(columnName);
+                }
             }
         }
         Collections.sort(foreignKeyColumnNames);
+
+        isCompositePrimaryKey = table.getPrimaryKey() != null && table.getPrimaryKey().size() > 1;
         if (table.getPrimaryKey() != null) {
             sortedPrimaryKeyColumnNames.addAll(table.getPrimaryKey());
             Collections.sort(sortedPrimaryKeyColumnNames);
@@ -66,14 +73,14 @@ public class CreateTableGenerator extends QueryGenerator {
             }
         }
 
-        boolean addedForeignKey = false;
-        for (TableForeignKeyInfo foreignKey : foreignKeySet) {
-            addForeignKeyReferenceTo(buf, foreignKey);
-            buf.append(", ");
-            addedForeignKey = true;
-        }
-        if (addedForeignKey) {
-            buf.delete(buf.length() - 2, buf.length());
+        if (foreignKeySet == null) {
+            for (ColumnInfo column : table.getForeignKeyColumns()) {
+                addForeignKeyReferenceTo(buf, column.getForeignKeyInfo(), column.getColumnName());
+            }
+        } else {
+            for (TableForeignKeyInfo foreignKey : foreignKeySet) {
+                addForeignKeyReferenceTo(buf, foreignKey);
+            }
         }
 
         return buf.append(");").toString();
@@ -104,6 +111,19 @@ public class CreateTableGenerator extends QueryGenerator {
         }
         if (foreignKey.getDeleteChangeAction() != null && !foreignKey.getDeleteChangeAction().isEmpty()) {
             buf.append(" ON DELETE ").append(foreignKey.getDeleteChangeAction());
+        }
+    }
+
+    private void addForeignKeyReferenceTo(StringBuilder buf, ForeignKeyInfo foreignKey, String localColumn) {
+        buf.append(", FOREIGN KEY(").append(localColumn)
+                .append(") REFERENCES ").append(foreignKey.getTableName())
+                .append("(").append(foreignKey.getColumnName())
+                .append(")");
+        if (foreignKey.getUpdateAction() != null) {
+            buf.append(" ON UPDATE ").append(foreignKey.getUpdateAction().toString());
+        }
+        if (foreignKey.getDeleteAction() != null) {
+            buf.append(" ON DELETE ").append(foreignKey.getDeleteAction().toString());
         }
     }
 

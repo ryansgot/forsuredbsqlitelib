@@ -86,17 +86,10 @@ public class MigrationSqlQueryTest {
                                 "CREATE TABLE test_table(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), unique_index_column TEXT UNIQUE);",
                                 "CREATE TRIGGER test_table_updated_trigger AFTER UPDATE ON test_table BEGIN UPDATE test_table SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "CREATE UNIQUE INDEX IF NOT EXISTS test_table_unique_index_column ON test_table(unique_index_column);",
-                                "CREATE TABLE test_table2(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TABLE test_table2(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), test_table_unique_index_column TEXT, FOREIGN KEY(test_table_unique_index_column) REFERENCES test_table(unique_index_column) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER test_table2_updated_trigger AFTER UPDATE ON test_table2 BEGIN UPDATE test_table2 SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE test_table ADD COLUMN non_unique_index_column TEXT;",
-                                "CREATE INDEX IF NOT EXISTS test_table_non_unique_index_column ON test_table(non_unique_index_column);",
-                                "DROP TABLE IF EXISTS temp_test_table2;",
-                                "CREATE TEMP TABLE temp_test_table2 AS SELECT _id, created, deleted, modified FROM test_table2;",
-                                "DROP TABLE IF EXISTS test_table2;",
-                                "CREATE TABLE test_table2(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), test_table_unique_index_column TEXT, FOREIGN KEY(test_table_unique_index_column) REFERENCES test_table(unique_index_column) ON UPDATE CASCADE ON DELETE CASCADE);",
-                                "CREATE TRIGGER test_table2_updated_trigger AFTER UPDATE ON test_table2 BEGIN UPDATE test_table2 SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "INSERT INTO test_table2 SELECT _id, created, deleted, modified, null AS test_table_unique_index_column FROM temp_test_table2;",
-                                "DROP TABLE IF EXISTS temp_test_table2;"
+                                "CREATE INDEX IF NOT EXISTS test_table_non_unique_index_column ON test_table(non_unique_index_column);"
                         )
                 },
                 {   // 05 additional_data_table has foreign key to profile_info_table has foreign key to user_table; legacy foreign key
@@ -104,9 +97,9 @@ public class MigrationSqlQueryTest {
                         Arrays.asList(
                                 "CREATE TABLE user(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
                                 "CREATE TRIGGER user_updated_trigger AFTER UPDATE ON user BEGIN UPDATE user SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "));",
+                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')), profile_info_id INTEGER, FOREIGN KEY(profile_info_id) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
                                 "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
                                 "ALTER TABLE user ADD COLUMN app_rating REAL;",
                                 "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
@@ -117,27 +110,7 @@ public class MigrationSqlQueryTest {
                                 "ALTER TABLE additional_data ADD COLUMN int_column INTEGER;",
                                 "ALTER TABLE user ADD COLUMN login_count INTEGER;",
                                 "ALTER TABLE additional_data ADD COLUMN long_column INTEGER;",
-                                "ALTER TABLE additional_data ADD COLUMN string_column TEXT;",
-                                "DROP TABLE IF EXISTS temp_additional_data;",
-                                "CREATE TEMP TABLE temp_additional_data AS SELECT _id, created, deleted, modified, int_column, long_column, string_column FROM additional_data;",
-                                "DROP TABLE IF EXISTS additional_data;",
-                                "CREATE TABLE additional_data(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), profile_info_id INTEGER, FOREIGN KEY(profile_info_id) REFERENCES profile_info(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
-                                "CREATE TRIGGER additional_data_updated_trigger AFTER UPDATE ON additional_data BEGIN UPDATE additional_data SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "ALTER TABLE additional_data ADD COLUMN int_column INTEGER;",
-                                "ALTER TABLE additional_data ADD COLUMN long_column INTEGER;",
-                                "ALTER TABLE additional_data ADD COLUMN string_column TEXT;",
-                                "INSERT INTO additional_data SELECT _id, created, deleted, modified, null AS profile_info_id, int_column, long_column, string_column FROM temp_additional_data;",
-                                "DROP TABLE IF EXISTS temp_additional_data;",
-                                "DROP TABLE IF EXISTS temp_profile_info;",
-                                "CREATE TEMP TABLE temp_profile_info AS SELECT _id, created, deleted, modified, awesome, binary_data, email_address FROM profile_info;",
-                                "DROP TABLE IF EXISTS profile_info;",
-                                "CREATE TABLE profile_info(_id INTEGER PRIMARY KEY, created DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), deleted INTEGER DEFAULT '0', modified DATETIME DEFAULT(" + CURRENT_UTC_TIME + "), user_id INTEGER, FOREIGN KEY(user_id) REFERENCES user(_id) ON UPDATE CASCADE ON DELETE CASCADE);",
-                                "CREATE TRIGGER profile_info_updated_trigger AFTER UPDATE ON profile_info BEGIN UPDATE profile_info SET modified=" + CURRENT_UTC_TIME + " WHERE _id=NEW._id; END;",
-                                "ALTER TABLE profile_info ADD COLUMN awesome INTEGER;",
-                                "ALTER TABLE profile_info ADD COLUMN binary_data BLOB;",
-                                "ALTER TABLE profile_info ADD COLUMN email_address TEXT;",
-                                "INSERT INTO profile_info SELECT _id, created, deleted, modified, null AS user_id, awesome, binary_data, email_address FROM temp_profile_info;",
-                                "DROP TABLE IF EXISTS temp_profile_info;"
+                                "ALTER TABLE additional_data ADD COLUMN string_column TEXT;"
                         )
                 },
                 {   // 06 same as 05, but with TableForeignKeyInfo instead of legacy foreign key
