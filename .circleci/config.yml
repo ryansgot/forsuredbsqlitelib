@@ -1,0 +1,54 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8
+      # environment variables for all commands executed in the primary container
+        environment:
+          GIT_AUTHOR_NAME: circleci
+          GIT_AUTHOR_EMAIL: noreply@circleci.com
+          GIT_COMMITTER_NAME: circleci
+          GIT_COMMITTER_EMAIL: noreply@circleci.com
+          EMAIL: noreply@circleci.com
+
+    working_directory: ~/code
+
+    environment:
+      JVM_OPTS: -Xmx2048m
+      TERM: dumb
+
+    steps:
+      - add-ssh-keys:
+         fingerprints:
+           - "9e:26:a9:20:04:92:17:96:f4:e7:5a:26:3a:b0:db:34"
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      - run: ./gradlew clean jacocoReport bumpVersion
+
+      - store_artifacts:
+          path: build/reports
+          destination: reports
+
+      - run: bash <(curl -s https://codecov.io/bash) -Z -t $CODECOV_TOKEN
+
+      - deploy:
+          name: deploy to bintray and s3
+          command: |
+            if [ "$CIRCLE_BRANCH" == "alpha" ] || [ "$CIRCLE_BRANCH" == "beta" ] || [ "$CIRCLE_BRANCH" == "master" ]; then
+              ./gradlew release -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_API_KEY -PawsMavenAccessKey=$AWS_ACCESS_KEY_ID -PawsMavenSecretKey=$AWS_SECRET_KEY
+            elif [ "$CIRCLE_BRANCH" == "integration" ]; then
+              ./gradlew releaseSnapshot -PawsMavenAccessKey=$AWS_ACCESS_KEY_ID -PawsMavenSecretKey=$AWS_SECRET_KEY
+            fi
