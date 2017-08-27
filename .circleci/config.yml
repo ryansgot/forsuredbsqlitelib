@@ -39,11 +39,8 @@ jobs:
       - run: ./gradlew clean jacocoReport bumpVersion
 
       - store_artifacts:
-          path: forsuredbapi/build/reports
-          destination: forsuredbapi/reports
-      - store_artifacts:
-          path: forsuredbcompiler/build/reports
-          destination: forsuredbcompiler/reports
+          path: build/reports
+          destination: reports
 
       - run: bash <(curl -s https://codecov.io/bash) -Z -t $CODECOV_TOKEN
 
