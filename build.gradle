@@ -21,8 +21,8 @@ long buildTime = new Date().getTime()
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_7
 
 repositories {
-    def awsAccessKeyId = project.hasProperty("awsMavenAccessKey") ? project.property("awsMavenAccessKey") : ""
-    def awsSecretKey = project.hasProperty("awsMavenSecretKey") ? project.property("awsMavenSecretKey") : ""
+    def awsAccessKeyId = project.hasProperty("awsMavenAccessKey") ? project.property("awsMavenAccessKey") : "${System.env.AWS_ACCESS_KEY_ID}"
+    def awsSecretKey = project.hasProperty("awsMavenSecretKey") ? project.property("awsMavenSecretKey") : "${System.env.AWS_SECRET_KEY}"
     maven {
         url "s3://repo.fsryan.com/release"
         credentials(AwsCredentials) {
