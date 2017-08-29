@@ -24,6 +24,7 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.*;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 /**
@@ -81,7 +82,7 @@ public class LegacyCreateTableGenerator extends QueryGenerator {
     }
 
     private List<ColumnInfo> determineColumnsToAdd() {
-        List<ColumnInfo> ret = new ArrayList<>(TableInfo.DEFAULT_COLUMNS.values());
+        List<ColumnInfo> ret = new ArrayList<>(DEFAULT_COLUMN_MAP.values());
         for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
             if (column.getColumnName().equals(TableInfo.DEFAULT_PRIMARY_KEY_COLUMN)) {
                 continue;

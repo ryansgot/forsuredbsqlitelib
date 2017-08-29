@@ -29,6 +29,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
+
 /**
  * <p>
  *     QueryGeneratorFactory is intended to create all of the {@link QueryGenerator} objects that generate the
@@ -146,7 +148,7 @@ public class QueryGeneratorFactory {
         final String currentColumnsJson = migration.getExtras().get("existing_column_names");
         if (currentColumnsJson == null) {
             Set<String> ret = new HashSet<>();
-            for (ColumnInfo column : TableInfo.DEFAULT_COLUMNS.values()) {
+            for (ColumnInfo column : DEFAULT_COLUMN_MAP.values()) {
                 ret.add(column.getColumnName());
             }
             return ret;

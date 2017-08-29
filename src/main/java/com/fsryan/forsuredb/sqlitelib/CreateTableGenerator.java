@@ -7,8 +7,14 @@ import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 public class CreateTableGenerator extends QueryGenerator {
@@ -157,9 +163,9 @@ public class CreateTableGenerator extends QueryGenerator {
     }
 
     private List<ColumnInfo> columnsToAdd() {
-        List<ColumnInfo> ret = new ArrayList<>(TableInfo.DEFAULT_COLUMNS.values());
+        List<ColumnInfo> ret = new ArrayList<>(DEFAULT_COLUMN_MAP.values());
         for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
-            if (TableInfo.DEFAULT_COLUMNS.keySet().contains(column.getColumnName())) {
+            if (DEFAULT_COLUMN_MAP.keySet().contains(column.getColumnName())) {
                 continue;
             }
             if (column.isUnique()

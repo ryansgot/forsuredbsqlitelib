@@ -17,7 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
+import com.fsryan.forsuredb.api.FSOrdering;
 import com.fsryan.forsuredb.api.Finder;
+import com.fsryan.forsuredb.api.OrderBy;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
@@ -112,18 +114,20 @@ public class SqlGenerator implements DBMSIntegrator {
     }
 
     @Override
-    public String orderByAsc(String tableName, String columnName) {
-        return unambiguousColumn(tableName, columnName) + " ASC";
-    }
+    public String expressOrdering(List<FSOrdering> orderings) {
+        if (orderings == null || orderings.isEmpty()) {
+            return "";
+        }
 
-    @Override
-    public String orderByDesc(String tableName, String columnName) {
-        return unambiguousColumn(tableName, columnName) + " DESC";
-    }
+        StringBuilder buf = new StringBuilder(" ORDER BY ");
+        for (FSOrdering ordering : orderings) {
+            buf.append(unambiguousColumn(ordering.table, ordering.column))
+                    .append(" ")
+                    .append(ordering.direction < OrderBy.ORDER_ASC ? "DESC" : "ASC")    // <-- 0 or positive treated as ASC
+                    .append(" AND ");
+        }
 
-    @Override
-    public String combineOrderByExpressions(List<String> orderByList) {
-        return orderByList.size() == 0 ? "" : orderByList.toString().replaceAll("(\\[|\\])", "");
+        return buf.delete(buf.length() - 5, buf.length()).toString();
     }
 
     @Override
