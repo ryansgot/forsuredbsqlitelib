@@ -1,17 +1,18 @@
 package com.fsryan.forsuredb.sqlitelib;
 
+import com.fsryan.forsuredb.api.FSOrdering;
+import com.fsryan.forsuredb.api.OrderBy;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import static com.fsryan.forsuredb.sqlitelib.CollectionUtil.stringMapOf;
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.EMPTY_SQL;
 import static com.fsryan.forsuredb.sqlitelib.TestData.TABLE_NAME;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class SqlGeneratorTest {
@@ -137,6 +138,89 @@ public class SqlGeneratorTest {
         @Test
         public void outputShouldEndInSemicolon() {
             assertTrue(sqlGenerator.newSingleRowInsertionSql(tableName, inputColumnValueMap).endsWith(";"));
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    public static class ExpressOrdering {
+
+        private final List<FSOrdering> input;
+        private final String expectedOutput;
+
+        public ExpressOrdering(List<FSOrdering> input, String expectedSql) {
+            this.input = input;
+            this.expectedOutput = expectedSql;
+        }
+
+        @Parameterized.Parameters
+        public static Iterable<Object[]> data() {
+            return Arrays.asList(new Object[][] {
+                    {   // 00: number greater than OrderBy.ORDER_ASC treated as ascending
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_ASC + 1)
+                            ),
+                            " ORDER BY table.column1 ASC"
+                    },
+                    {   // 01: number lower than OrderBy.ORDER_DESC treated as descending
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_DESC - 1)
+                            ),
+                            " ORDER BY table.column1 DESC"
+                    },
+                    {   // 02: OrderBy.ORDER_ASC treated as ASC
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_ASC)
+                            ),
+                            " ORDER BY table.column1 ASC"
+                    },
+                    {   // 03: OrderBy.ORDER_DESC treated as DESC
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_DESC)
+                            ),
+                            " ORDER BY table.column1 DESC"
+                    },
+                    {   // 04: Two different ascending on same table
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
+                                    new FSOrdering("table", "column2", OrderBy.ORDER_ASC)
+                            ),
+                            " ORDER BY table.column1 ASC AND table.column2 ASC"
+                    },
+                    {   // 05: Two different descending on same table
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_DESC),
+                                    new FSOrdering("table", "column2", OrderBy.ORDER_DESC)
+                            ),
+                            " ORDER BY table.column1 DESC AND table.column2 DESC"
+                    },
+                    {   // 06: ASC and then DESC for different columns
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
+                                    new FSOrdering("table", "column2", OrderBy.ORDER_DESC)
+                            ),
+                            " ORDER BY table.column1 ASC AND table.column2 DESC"
+                    },
+                    {   // 07: ASC and then DESC for different columns of different tables same column name
+                            Arrays.asList(
+                                    new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
+                                    new FSOrdering("table2", "column1", OrderBy.ORDER_DESC)
+                            ),
+                            " ORDER BY table.column1 ASC AND table2.column1 DESC"
+                    },
+                    {   // 08: Empty list returns empty string
+                            new ArrayList<FSOrdering>(0),
+                            ""
+                    },
+                    {   // 09: null returns empty string
+                            null,
+                            ""
+                    }
+            });
+        }
+
+        @Test
+        public void should() {
+            assertEquals(expectedOutput, new SqlGenerator().expressOrdering(input));
         }
     }
 }

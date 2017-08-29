@@ -24,6 +24,8 @@ import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
 import java.util.*;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
+
 /**
  * <p>
  *     For backwards compatibilty with forsuredbcompiler versions that produce
@@ -105,7 +107,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
     private List<String> allColumnAdditionQueries() {
         List<String> retList = new LinkedList<>();
         for (ColumnInfo columnInfo : table.getNonForeignKeyColumns()) {
-            if (TableInfo.DEFAULT_COLUMNS.containsKey(columnInfo.getColumnName()) || columnInfo.isUnique()) {
+            if (DEFAULT_COLUMN_MAP.containsKey(columnInfo.getColumnName()) || columnInfo.isUnique()) {
                 continue;   // <-- these columns were added in the CREATE TABLE query
             }
 
