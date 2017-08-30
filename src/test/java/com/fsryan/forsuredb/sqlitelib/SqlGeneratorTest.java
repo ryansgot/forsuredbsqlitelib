@@ -184,28 +184,28 @@ public class SqlGeneratorTest {
                                     new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
                                     new FSOrdering("table", "column2", OrderBy.ORDER_ASC)
                             ),
-                            " ORDER BY table.column1 ASC AND table.column2 ASC"
+                            " ORDER BY table.column1 ASC, table.column2 ASC"
                     },
                     {   // 05: Two different descending on same table
                             Arrays.asList(
                                     new FSOrdering("table", "column1", OrderBy.ORDER_DESC),
                                     new FSOrdering("table", "column2", OrderBy.ORDER_DESC)
                             ),
-                            " ORDER BY table.column1 DESC AND table.column2 DESC"
+                            " ORDER BY table.column1 DESC, table.column2 DESC"
                     },
-                    {   // 06: ASC and then DESC for different columns
+                    {   // 06: ASC, then DESC for different columns
                             Arrays.asList(
                                     new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
                                     new FSOrdering("table", "column2", OrderBy.ORDER_DESC)
                             ),
-                            " ORDER BY table.column1 ASC AND table.column2 DESC"
+                            " ORDER BY table.column1 ASC, table.column2 DESC"
                     },
-                    {   // 07: ASC and then DESC for different columns of different tables same column name
+                    {   // 07: ASC, then DESC for different columns of different tables same column name
                             Arrays.asList(
                                     new FSOrdering("table", "column1", OrderBy.ORDER_ASC),
                                     new FSOrdering("table2", "column1", OrderBy.ORDER_DESC)
                             ),
-                            " ORDER BY table.column1 ASC AND table2.column1 DESC"
+                            " ORDER BY table.column1 ASC, table2.column1 DESC"
                     },
                     {   // 08: Empty list returns empty string
                             new ArrayList<FSOrdering>(0),
