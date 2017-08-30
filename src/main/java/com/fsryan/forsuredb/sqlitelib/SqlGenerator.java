@@ -124,10 +124,10 @@ public class SqlGenerator implements DBMSIntegrator {
             buf.append(unambiguousColumn(ordering.table, ordering.column))
                     .append(" ")
                     .append(ordering.direction < OrderBy.ORDER_ASC ? "DESC" : "ASC")    // <-- 0 or positive treated as ASC
-                    .append(" AND ");
+                    .append(", ");
         }
 
-        return buf.delete(buf.length() - 5, buf.length()).toString();
+        return buf.delete(buf.length() - 2, buf.length()).toString();
     }
 
     @Override
