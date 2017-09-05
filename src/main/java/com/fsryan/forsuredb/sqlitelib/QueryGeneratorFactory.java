@@ -46,6 +46,7 @@ public class QueryGeneratorFactory {
             return new ArrayList<>();
         }
     };
+    private static final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
     private static final Gson gson = new Gson();
 
     // tableName -> list of column names that are NEW foreign key columns--not existing
@@ -93,7 +94,7 @@ public class QueryGeneratorFactory {
             case UPDATE_PRIMARY_KEY:
                 return new UpdatePrimaryKeyGenerator(migration.getTableName(), existingColumnNamesFrom(migration), targetSchema);
             case UPDATE_FOREIGN_KEYS:
-                final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
+
                 final String currentForeignKeysJson = migration.getExtras().get(migration.getExtras().get("current_foreign_keys"));
                 final Set<TableForeignKeyInfo> currentForeignKeys = gson.fromJson(currentForeignKeysJson, tableForeignKeysInfoSetType);
                 return new UpdateForeignKeysGenerator(table.getTableName(), currentForeignKeys, existingColumnNamesFrom(migration), targetSchema);

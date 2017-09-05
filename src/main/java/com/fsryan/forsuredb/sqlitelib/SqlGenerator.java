@@ -32,7 +32,13 @@ import java.util.*;
 public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        }
+    };
+
     public static final String CHANGE_ACTION_NO_ACTION = "NO ACTION";
     public static final String CHANGE_ACTION_RESTRICT = "RESTRICT";
     public static final String CHANGE_ACTION_SET_NULL = "SET NULL";
@@ -146,13 +152,13 @@ public class SqlGenerator implements DBMSIntegrator {
 
     @Override
     public String formatDate(Date date) {
-        return DATE_FORMAT.format(date);
+        return DATE_FORMAT.get().format(date);
     }
 
     @Override
     public Date parseDate(String dateStr) {
         try {
-            return DATE_FORMAT.parse(dateStr);
+            return DATE_FORMAT.get().parse(dateStr);
         } catch (ParseException pe) {
             pe.printStackTrace();
         }
