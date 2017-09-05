@@ -7,11 +7,25 @@ import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 public class CreateTableGenerator extends QueryGenerator {
+
+    private static final Comparator<Map.Entry<String, String>> childToParentColumnMapEntryComparator = new Comparator<Map.Entry<String, String>>() {
+        @Override
+        public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
+            // sorts the entries by their keys
+            return entry1.getKey().compareTo(entry2.getKey());
+        }
+    };
 
     private final TableInfo table;
     private final Map<String, TableInfo> targetSchema;
@@ -91,13 +105,7 @@ public class CreateTableGenerator extends QueryGenerator {
 
         StringBuilder foreignColumnBuf = new StringBuilder();
         List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(foreignKey.getLocalToForeignColumnMap().entrySet());
-        Collections.sort(sortedEntries, new Comparator<Map.Entry<String, String>>() {
-            @Override
-            public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
-                // sorts the entries by their keys
-                return entry1.getKey().compareTo(entry2.getKey());
-            }
-        });
+        Collections.sort(sortedEntries, childToParentColumnMapEntryComparator);
         for (Map.Entry<String, String> entry : sortedEntries) {
             buf.append(entry.getKey()).append(", ");
             foreignColumnBuf.append(entry.getValue()).append(", ");
@@ -157,9 +165,9 @@ public class CreateTableGenerator extends QueryGenerator {
     }
 
     private List<ColumnInfo> columnsToAdd() {
-        List<ColumnInfo> ret = new ArrayList<>(TableInfo.DEFAULT_COLUMNS.values());
+        List<ColumnInfo> ret = new ArrayList<>(DEFAULT_COLUMN_MAP.values());
         for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
-            if (TableInfo.DEFAULT_COLUMNS.keySet().contains(column.getColumnName())) {
+            if (DEFAULT_COLUMN_MAP.keySet().contains(column.getColumnName())) {
                 continue;
             }
             if (column.isUnique()

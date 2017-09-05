@@ -17,7 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
+import com.fsryan.forsuredb.api.FSOrdering;
 import com.fsryan.forsuredb.api.Finder;
+import com.fsryan.forsuredb.api.OrderBy;
 import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.MigrationSet;
@@ -30,7 +32,13 @@ import java.util.*;
 public class SqlGenerator implements DBMSIntegrator {
 
     public static final String CURRENT_UTC_TIME = "STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')";
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        }
+    };
+
     public static final String CHANGE_ACTION_NO_ACTION = "NO ACTION";
     public static final String CHANGE_ACTION_RESTRICT = "RESTRICT";
     public static final String CHANGE_ACTION_SET_NULL = "SET NULL";
@@ -112,18 +120,20 @@ public class SqlGenerator implements DBMSIntegrator {
     }
 
     @Override
-    public String orderByAsc(String tableName, String columnName) {
-        return unambiguousColumn(tableName, columnName) + " ASC";
-    }
+    public String expressOrdering(List<FSOrdering> orderings) {
+        if (orderings == null || orderings.isEmpty()) {
+            return "";
+        }
 
-    @Override
-    public String orderByDesc(String tableName, String columnName) {
-        return unambiguousColumn(tableName, columnName) + " DESC";
-    }
+        StringBuilder buf = new StringBuilder(" ORDER BY ");
+        for (FSOrdering ordering : orderings) {
+            buf.append(unambiguousColumn(ordering.table, ordering.column))
+                    .append(" ")
+                    .append(ordering.direction < OrderBy.ORDER_ASC ? "DESC" : "ASC")    // <-- 0 or positive treated as ASC
+                    .append(", ");
+        }
 
-    @Override
-    public String combineOrderByExpressions(List<String> orderByList) {
-        return orderByList.size() == 0 ? "" : orderByList.toString().replaceAll("(\\[|\\])", "");
+        return buf.delete(buf.length() - 2, buf.length()).toString();
     }
 
     @Override
@@ -142,13 +152,13 @@ public class SqlGenerator implements DBMSIntegrator {
 
     @Override
     public String formatDate(Date date) {
-        return DATE_FORMAT.format(date);
+        return DATE_FORMAT.get().format(date);
     }
 
     @Override
     public Date parseDate(String dateStr) {
         try {
-            return DATE_FORMAT.parse(dateStr);
+            return DATE_FORMAT.get().parse(dateStr);
         } catch (ParseException pe) {
             pe.printStackTrace();
         }

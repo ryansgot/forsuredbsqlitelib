@@ -26,15 +26,10 @@ import java.util.*;
 
 public class UpdateForeignKeysGenerator extends RecreateTableGenerator {
 
-    private final List<ColumnInfo> newForeignKeyColumns;
-    private final Set<TableForeignKeyInfo> currentForeignKeys;
-
     public UpdateForeignKeysGenerator(String tableName,
                                       Set<TableForeignKeyInfo> currentForeignKeys,
                                       Set<String> currentColumns,
                                       Map<String, TableInfo> targetSchema) {
         super(tableName, currentColumns, targetSchema, Migration.Type.UPDATE_FOREIGN_KEYS);
-        this.currentForeignKeys = currentForeignKeys;
-        this.newForeignKeyColumns = new ArrayList<>();
     }
 }

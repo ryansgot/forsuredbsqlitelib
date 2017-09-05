@@ -29,6 +29,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.fsryan.forsuredb.sqlitelib.ApiInfo.DEFAULT_COLUMN_MAP;
+
 /**
  * <p>
  *     QueryGeneratorFactory is intended to create all of the {@link QueryGenerator} objects that generate the
@@ -44,6 +46,7 @@ public class QueryGeneratorFactory {
             return new ArrayList<>();
         }
     };
+    private static final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
     private static final Gson gson = new Gson();
 
     // tableName -> list of column names that are NEW foreign key columns--not existing
@@ -91,7 +94,7 @@ public class QueryGeneratorFactory {
             case UPDATE_PRIMARY_KEY:
                 return new UpdatePrimaryKeyGenerator(migration.getTableName(), existingColumnNamesFrom(migration), targetSchema);
             case UPDATE_FOREIGN_KEYS:
-                final Type tableForeignKeysInfoSetType = new TypeToken<Set<TableForeignKeyInfo>>() {}.getType();
+
                 final String currentForeignKeysJson = migration.getExtras().get(migration.getExtras().get("current_foreign_keys"));
                 final Set<TableForeignKeyInfo> currentForeignKeys = gson.fromJson(currentForeignKeysJson, tableForeignKeysInfoSetType);
                 return new UpdateForeignKeysGenerator(table.getTableName(), currentForeignKeys, existingColumnNamesFrom(migration), targetSchema);
@@ -146,7 +149,7 @@ public class QueryGeneratorFactory {
         final String currentColumnsJson = migration.getExtras().get("existing_column_names");
         if (currentColumnsJson == null) {
             Set<String> ret = new HashSet<>();
-            for (ColumnInfo column : TableInfo.DEFAULT_COLUMNS.values()) {
+            for (ColumnInfo column : DEFAULT_COLUMN_MAP.values()) {
                 ret.add(column.getColumnName());
             }
             return ret;
