@@ -107,7 +107,7 @@ bintray {
     user = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : ''
     key = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
 
-    publications = ['forsuredbsqlitelibPublication']
+    publications = ['bintray']
     pkg {
         repo = 'maven'
         name = 'sqlitelib'
