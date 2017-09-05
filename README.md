@@ -4,7 +4,10 @@ Current build status: [![CircleCI](https://circleci.com/gh/ryansgot/forsuredbsql
 
 ## Revisions
 
-###
+### 0.6.0
+- Updated to conform to updated DBMSIntegrator which removed the previous three methods and collapsed them into ```expressOrderings(List<FSOrdering>)```
+
+### 0.5.0
 - Support for composite keys
 - Support for default value
 - Removed dependency upon google guava
