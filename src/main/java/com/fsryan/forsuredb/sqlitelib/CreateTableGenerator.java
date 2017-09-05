@@ -19,6 +19,14 @@ import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.CURRENT_UTC_TIME;
 
 public class CreateTableGenerator extends QueryGenerator {
 
+    private static final Comparator<Map.Entry<String, String>> childToParentColumnMapEntryComparator = new Comparator<Map.Entry<String, String>>() {
+        @Override
+        public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
+            // sorts the entries by their keys
+            return entry1.getKey().compareTo(entry2.getKey());
+        }
+    };
+
     private final TableInfo table;
     private final Map<String, TableInfo> targetSchema;
     private final boolean isCompositePrimaryKey;
@@ -97,13 +105,7 @@ public class CreateTableGenerator extends QueryGenerator {
 
         StringBuilder foreignColumnBuf = new StringBuilder();
         List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(foreignKey.getLocalToForeignColumnMap().entrySet());
-        Collections.sort(sortedEntries, new Comparator<Map.Entry<String, String>>() {
-            @Override
-            public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
-                // sorts the entries by their keys
-                return entry1.getKey().compareTo(entry2.getKey());
-            }
-        });
+        Collections.sort(sortedEntries, childToParentColumnMapEntryComparator);
         for (Map.Entry<String, String> entry : sortedEntries) {
             buf.append(entry.getKey()).append(", ");
             foreignColumnBuf.append(entry.getValue()).append(", ");
