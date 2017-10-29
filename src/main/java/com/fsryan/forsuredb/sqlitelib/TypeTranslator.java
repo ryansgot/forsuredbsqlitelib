@@ -18,11 +18,13 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.lang.model.type.TypeMirror;
 
 public enum TypeTranslator {
+    BIG_INTEGER(BigInteger.class.getName(), "INTEGER"),
     BIG_DECIMAL(BigDecimal.class.getName(), "REAL"),
     BOOLEAN("boolean", "INTEGER"),
     BOOLEAN_WRAPPER(Boolean.class.getName(), "INTEGER"),
@@ -35,7 +37,7 @@ public enum TypeTranslator {
     INT("int", "INTEGER"),
     INT_WRAPPER(Integer.class.getName(), "INTEGER"),
     LONG("long", "INTEGER"),
-    LOG_WRAPPER(Long.class.getName(), "INTEGER"),
+    LONG_WRAPPER(Long.class.getName(), "INTEGER"),
     STRING(String.class.getName(), "TEXT");
 
     private String qualifiedType;
