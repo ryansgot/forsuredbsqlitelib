@@ -20,7 +20,7 @@ package com.fsryan.forsuredb.sqlitelib;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
 import org.junit.Test;
 
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -31,10 +31,7 @@ public abstract class BaseSQLiteGeneratorTest {
     private List<String> expectedSql;
 
     public BaseSQLiteGeneratorTest(String[] expectedSql) {
-        this.expectedSql = new LinkedList<>();
-        for (String sql : expectedSql) {
-            this.expectedSql.add(sql);
-        }
+        this.expectedSql = Arrays.asList(expectedSql);
     }
 
     @Test

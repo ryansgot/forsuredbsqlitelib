@@ -30,7 +30,7 @@ import static com.fsryan.forsuredb.sqlitelib.TestData.*;
 @RunWith(Parameterized.class)
 public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
-    private AddColumnGenerator generatorUndertest;
+    private AddColumnGenerator generatorUnderTest;
 
     private ColumnInfo column;
 
@@ -85,11 +85,11 @@ public class AddColumnGeneratorTest extends BaseSQLiteGeneratorTest {
 
     @Override
     protected QueryGenerator getGenerator() {
-        return generatorUndertest;
+        return generatorUnderTest;
     }
 
     @Before
     public void setUp() {
-        generatorUndertest = new AddColumnGenerator(TABLE_NAME, column);
+        generatorUnderTest = new AddColumnGenerator(TABLE_NAME, column);
     }
 }
