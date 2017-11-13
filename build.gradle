@@ -47,8 +47,9 @@ dependencies {
     // TODO: remove dependency upon gson--this is limiting for the consumers
     compile 'com.google.code.gson:gson:2.8.0'
 
-    compile 'com.fsryan.forsuredb:forsuredbapi:0.12.0-alpha'
+    compile 'com.fsryan.forsuredb:forsuredbapi:0.12.4-test+1510581558891'
 
+    testCompile 'com.fsryan.forsuredb:forsuredbmodels-gson:0.12.4-test+1510581558891'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
 }

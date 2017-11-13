@@ -20,10 +20,11 @@ package com.fsryan.forsuredb.sqlitelib;
 import com.fsryan.forsuredb.api.FSOrdering;
 import com.fsryan.forsuredb.api.Finder;
 import com.fsryan.forsuredb.api.OrderBy;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
-import com.fsryan.forsuredb.api.migration.MigrationSet;
 import com.fsryan.forsuredb.api.sqlgeneration.DBMSIntegrator;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
+import com.fsryan.forsuredb.migration.MigrationSet;
+import com.fsryan.forsuredb.serialization.FSDbInfoSerializer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,24 +61,24 @@ public class SqlGenerator implements DBMSIntegrator {
     public SqlGenerator() {}
 
     @Override
-    public List<String> generateMigrationSql(MigrationSet migrationSet) {
-        if (migrationSet == null || !migrationSet.containsMigrations() || migrationSet.getTargetSchema() == null) {
+    public List<String> generateMigrationSql(MigrationSet migrationSet, FSDbInfoSerializer serializer) {
+        if (migrationSet == null || !migrationSet.containsMigrations() || migrationSet.targetSchema() == null) {
             return new ArrayList<>();
         }
 
         QueryGeneratorFactory qgf = new QueryGeneratorFactory(migrationSet);
-        List<Migration> migrations = migrationSet.getOrderedMigrations();
-        Collections.sort(migrations, new MigrationComparator(migrationSet.getTargetSchema()));
+        List<Migration> migrations = migrationSet.orderedMigrations();
+        Collections.sort(migrations, new MigrationComparator(migrationSet.targetSchema()));
         List<String> sqlList = new ArrayList<>();
         Set<String> recreatedTables = new HashSet<>();
         for (Migration m : migrations) {
-            if (recreatedTables.contains(m.getTableName()) && isMigrationHandledOnCreate(m, migrationSet.getTargetSchema())) {
+            if (recreatedTables.contains(m.tableName()) && isMigrationHandledOnCreate(m, migrationSet.targetSchema())) {
                 continue;
             }
-            if (TYPES_REQUIRING_TABLE_RECREATION.contains(m.getType())) {
-                recreatedTables.add(m.getTableName());
+            if (TYPES_REQUIRING_TABLE_RECREATION.contains(m.type())) {
+                recreatedTables.add(m.tableName());
             }
-            sqlList.addAll(qgf.getFor(m, migrationSet.getTargetSchema()).generate());
+            sqlList.addAll(qgf.getFor(m, migrationSet.targetSchema(), serializer).generate());
         }
 
         return sqlList;
@@ -181,16 +182,16 @@ public class SqlGenerator implements DBMSIntegrator {
     }
 
     private static boolean isMigrationHandledOnCreate(Migration m, Map<String, TableInfo> targetSchema) {
-        switch (m.getType()) {
+        switch (m.type()) {
             case ADD_UNIQUE_INDEX:
                 // intentionally falling through
             case ADD_FOREIGN_KEY_REFERENCE:
                 return true;
             case ALTER_TABLE_ADD_COLUMN:
-                TableInfo table = targetSchema.get(m.getTableName());
-                return table.isForeignKeyColumn(m.getColumnName())
-                        || table.getPrimaryKey().contains(m.getColumnName())
-                        || table.getColumn(m.getColumnName()).isUnique();
+                TableInfo table = targetSchema.get(m.tableName());
+                return table.isForeignKeyColumn(m.columnName())
+                        || table.getPrimaryKey().contains(m.columnName())
+                        || table.getColumn(m.columnName()).unique();
         }
         return false;
     }

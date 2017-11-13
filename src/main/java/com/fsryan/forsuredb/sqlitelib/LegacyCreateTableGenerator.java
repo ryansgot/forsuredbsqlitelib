@@ -17,10 +17,10 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ public class LegacyCreateTableGenerator extends QueryGenerator {
         this.targetSchema = targetSchema;
         TableInfo table = targetSchema.get(tableName);
         primaryKey = table.getPrimaryKey();
-        primaryKeyOnConflict = table.getPrimaryKeyOnConflict();
+        primaryKeyOnConflict = table.primaryKeyOnConflict();
         sortedPrimaryKeyColumnNames = new ArrayList<>(primaryKey);
         Collections.sort(sortedPrimaryKeyColumnNames);
     }
@@ -87,7 +87,7 @@ public class LegacyCreateTableGenerator extends QueryGenerator {
             if (column.getColumnName().equals(TableInfo.DEFAULT_PRIMARY_KEY_COLUMN)) {
                 continue;
             }
-            if (column.isUnique() || primaryKey.contains(column.getColumnName())) {
+            if (column.unique() || primaryKey.contains(column.getColumnName())) {
                 ret.add(column);
             }
         }
@@ -97,7 +97,7 @@ public class LegacyCreateTableGenerator extends QueryGenerator {
     private List<String> uniqueIndexQueries() {
         List<String> ret = new ArrayList<>();
         for (ColumnInfo column : targetSchema.get(getTableName()).getColumns()) {
-            if (!column.isUnique()) {
+            if (!column.unique()) {
                 continue;
             }
             ret.addAll(new AddIndexGenerator(getTableName(), column).generate());
@@ -109,14 +109,14 @@ public class LegacyCreateTableGenerator extends QueryGenerator {
         return column.getColumnName()
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
                 + (primaryKey.size() == 1 && primaryKey.contains(column.getColumnName()) ? " PRIMARY KEY" + (primaryKeyOnConflict == null || primaryKeyOnConflict.isEmpty() ? "" : " ON CONFLICT " + primaryKeyOnConflict): "")
-                + (column.isUnique() ? " UNIQUE" : "")
+                + (column.unique() ? " UNIQUE" : "")
                 + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "");
     }
 
     private String getDefaultValueFrom(ColumnInfo column) {
         TypeTranslator tt = TypeTranslator.from(column.getQualifiedType());
-        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
-            return " '" + column.getDefaultValue() + "'";
+        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.defaultValue())) {
+            return " '" + column.defaultValue() + "'";
         }
         return "(" + CURRENT_UTC_TIME + ")";
     }

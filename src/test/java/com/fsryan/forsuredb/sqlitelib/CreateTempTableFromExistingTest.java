@@ -17,9 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.TableInfo;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -56,7 +56,10 @@ public class CreateTempTableFromExistingTest extends BaseSQLiteGeneratorTest {
                 },
                 // Copy a table with a foreign key column
                 {
-                        table().columnMap(columnMapOf(longCol().foreignKeyInfo(cascadeFKI("user").build()).build())).build(),
+                        table()
+                                .columnMap(columnMapOf(
+                                        longCol().foreignKeyInfo(cascadeFKI("user").build()).build())
+                                ).build(),
                         new ColumnInfo[] {},
                         new String[] {
                                 "DROP TABLE IF EXISTS temp_" + TABLE_NAME + ";",

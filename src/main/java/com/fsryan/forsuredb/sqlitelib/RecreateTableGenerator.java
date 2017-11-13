@@ -1,9 +1,9 @@
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.*;
 
@@ -53,7 +53,7 @@ public abstract class RecreateTableGenerator extends QueryGenerator {
         for (ColumnInfo columnInfo : table.getNonForeignKeyColumns()) { // TODO: update this to filter based upon TableForeignKeyInfo
             if (DEFAULT_COLUMN_MAP.containsKey(columnInfo.getColumnName())
                     || table.getPrimaryKey().contains(columnInfo.getColumnName())
-                    || columnInfo.isUnique()) {
+                    || columnInfo.unique()) {
                 continue;   // <-- these columns were added in the CREATE TABLE query
             }
             retList.addAll(new AddColumnGenerator(getTableName(), columnInfo).generate());

@@ -17,9 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,9 +34,9 @@ public class AddIndexGenerator extends QueryGenerator {
     }
 
     /*package*/ AddIndexGenerator(String tableName, ColumnInfo column, boolean forceUnique) {
-        super(tableName, forceUnique || column.isUnique() ? Migration.Type.ADD_UNIQUE_INDEX : Migration.Type.ADD_INDEX);
+        super(tableName, forceUnique || column.unique() ? Migration.Type.ADD_UNIQUE_INDEX : Migration.Type.ADD_INDEX);
         this.column = column;
-        unique = forceUnique || column.isUnique();
+        unique = forceUnique || column.unique();
     }
 
     @Override

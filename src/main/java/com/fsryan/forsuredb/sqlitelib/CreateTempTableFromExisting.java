@@ -17,10 +17,10 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class CreateTempTableFromExisting extends QueryGenerator {
     }
 
     public CreateTempTableFromExisting(TableInfo table, ColumnInfo... excludedColumns) {
-        super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
+        super(table.tableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
         for (ColumnInfo column : excludedColumns) {
             this.excludedColumnsMap.put(column.getColumnName(), column);
@@ -67,6 +67,6 @@ public class CreateTempTableFromExisting extends QueryGenerator {
     }
 
     private String tempTableName() {
-        return "temp_" + table.getTableName();
+        return "temp_" + table.tableName();
     }
 }

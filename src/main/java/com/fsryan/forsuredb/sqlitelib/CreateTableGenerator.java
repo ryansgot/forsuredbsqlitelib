@@ -1,11 +1,11 @@
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.ForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.ForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,14 +39,14 @@ public class CreateTableGenerator extends QueryGenerator {
         table = targetSchema.get(tableName);
         this.targetSchema = targetSchema;
 
-        foreignKeySet = table.getForeignKeys();
+        foreignKeySet = table.foreignKeys();
         if (foreignKeySet == null) {
             for (ColumnInfo column : table.getForeignKeyColumns()) {
                 foreignKeyColumnNames.add(column.getColumnName());
             }
         } else {
             for (TableForeignKeyInfo foreignKey : foreignKeySet) {
-                for (String columnName : foreignKey.getLocalToForeignColumnMap().keySet()) {
+                for (String columnName : foreignKey.localToForeignColumnMap().keySet()) {
                     foreignKeyColumnNames.add(columnName);
                 }
             }
@@ -82,14 +82,14 @@ public class CreateTableGenerator extends QueryGenerator {
                 buf.append(primaryKeyColumnName).append(", ");
             }
             buf.delete(buf.length() - 2, buf.length()).append(')');
-            if (table.getPrimaryKeyOnConflict() != null && !table.getPrimaryKeyOnConflict().isEmpty()) {
-                buf.append(" ON CONFLICT ").append(table.getPrimaryKeyOnConflict());
+            if (table.primaryKeyOnConflict() != null && !table.primaryKeyOnConflict().isEmpty()) {
+                buf.append(" ON CONFLICT ").append(table.primaryKeyOnConflict());
             }
         }
 
         if (foreignKeySet == null) {
             for (ColumnInfo column : table.getForeignKeyColumns()) {
-                addForeignKeyReferenceTo(buf, column.getForeignKeyInfo(), column.getColumnName());
+                addForeignKeyReferenceTo(buf, column.foreignKeyInfo(), column.getColumnName());
             }
         } else {
             for (TableForeignKeyInfo foreignKey : foreignKeySet) {
@@ -104,41 +104,41 @@ public class CreateTableGenerator extends QueryGenerator {
         buf.append(", FOREIGN KEY(");
 
         StringBuilder foreignColumnBuf = new StringBuilder();
-        List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(foreignKey.getLocalToForeignColumnMap().entrySet());
+        List<Map.Entry<String, String>> sortedEntries = new ArrayList<>(foreignKey.localToForeignColumnMap().entrySet());
         Collections.sort(sortedEntries, childToParentColumnMapEntryComparator);
         for (Map.Entry<String, String> entry : sortedEntries) {
             buf.append(entry.getKey()).append(", ");
             foreignColumnBuf.append(entry.getValue()).append(", ");
         }
         buf.delete(buf.length() - 2, buf.length())
-                .append(") REFERENCES ").append(foreignKey.getForeignTableName())
+                .append(") REFERENCES ").append(foreignKey.foreignTableName())
                 .append("(").append(foreignColumnBuf.delete(foreignColumnBuf.length() - 2, foreignColumnBuf.length()))
                 .append(")");
-        if (foreignKey.getUpdateChangeAction() != null && !foreignKey.getUpdateChangeAction().isEmpty()) {
-            buf.append(" ON UPDATE ").append(foreignKey.getUpdateChangeAction());
+        if (foreignKey.updateChangeAction() != null && !foreignKey.updateChangeAction().isEmpty()) {
+            buf.append(" ON UPDATE ").append(foreignKey.updateChangeAction());
         }
-        if (foreignKey.getDeleteChangeAction() != null && !foreignKey.getDeleteChangeAction().isEmpty()) {
-            buf.append(" ON DELETE ").append(foreignKey.getDeleteChangeAction());
+        if (foreignKey.deleteChangeAction() != null && !foreignKey.deleteChangeAction().isEmpty()) {
+            buf.append(" ON DELETE ").append(foreignKey.deleteChangeAction());
         }
     }
 
     private void addForeignKeyReferenceTo(StringBuilder buf, ForeignKeyInfo foreignKey, String localColumn) {
         buf.append(", FOREIGN KEY(").append(localColumn)
-                .append(") REFERENCES ").append(foreignKey.getTableName())
-                .append("(").append(foreignKey.getColumnName())
+                .append(") REFERENCES ").append(foreignKey.tableName())
+                .append("(").append(foreignKey.columnName())
                 .append(")");
-        if (foreignKey.getUpdateAction() != null) {
-            buf.append(" ON UPDATE ").append(foreignKey.getUpdateAction().toString());
+        if (foreignKey.updateAction() != null) {
+            buf.append(" ON UPDATE ").append(foreignKey.updateAction().toString());
         }
-        if (foreignKey.getDeleteAction() != null) {
-            buf.append(" ON DELETE ").append(foreignKey.getDeleteAction().toString());
+        if (foreignKey.deleteAction() != null) {
+            buf.append(" ON DELETE ").append(foreignKey.deleteAction().toString());
         }
     }
 
     private List<String> uniqueIndexQueries() {
         List<String> ret = new ArrayList<>();
         for (ColumnInfo column : table.getColumns()) {
-            if (!column.isUnique()) {
+            if (!column.unique()) {
                 continue;
             }
             ret.addAll(new AddIndexGenerator(getTableName(), column).generate());
@@ -150,16 +150,16 @@ public class CreateTableGenerator extends QueryGenerator {
         return column.getColumnName()
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
                 + (!isCompositePrimaryKey && sortedPrimaryKeyColumnNames.contains(column.getColumnName())
-                        ? " PRIMARY KEY" + (table.getPrimaryKeyOnConflict() == null || table.getPrimaryKeyOnConflict().isEmpty() ? "" : " ON CONFLICT " + table.getPrimaryKeyOnConflict())
+                        ? " PRIMARY KEY" + (table.primaryKeyOnConflict() == null || table.primaryKeyOnConflict().isEmpty() ? "" : " ON CONFLICT " + table.primaryKeyOnConflict())
                         : "")
-                + (column.isUnique() ? " UNIQUE" : "")
+                + (column.unique() ? " UNIQUE" : "")
                 + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "");
     }
 
     private String getDefaultValueFrom(ColumnInfo column) {
         TypeTranslator tt = TypeTranslator.from(column.getQualifiedType());
-        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
-            return " '" + column.getDefaultValue() + "'";
+        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.defaultValue())) {
+            return " '" + column.defaultValue() + "'";
         }
         return "(" + CURRENT_UTC_TIME + ")";
     }
@@ -170,7 +170,7 @@ public class CreateTableGenerator extends QueryGenerator {
             if (DEFAULT_COLUMN_MAP.keySet().contains(column.getColumnName())) {
                 continue;
             }
-            if (column.isUnique()
+            if (column.unique()
                     || foreignKeyColumnNames.contains(column.getColumnName())
                     || table.getPrimaryKey().contains(column.getColumnName())) {
                 ret.add(column);
