@@ -128,10 +128,10 @@ public class CreateTableGenerator extends QueryGenerator {
                 .append("(").append(foreignKey.columnName())
                 .append(")");
         if (foreignKey.updateAction() != null) {
-            buf.append(" ON UPDATE ").append(foreignKey.updateAction().toString());
+            buf.append(" ON UPDATE ").append(foreignKey.updateAction());
         }
         if (foreignKey.deleteAction() != null) {
-            buf.append(" ON DELETE ").append(foreignKey.deleteAction().toString());
+            buf.append(" ON DELETE ").append(foreignKey.deleteAction());
         }
     }
 
