@@ -17,10 +17,10 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
+
+import com.fsryan.forsuredb.info.TableForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.*;
 

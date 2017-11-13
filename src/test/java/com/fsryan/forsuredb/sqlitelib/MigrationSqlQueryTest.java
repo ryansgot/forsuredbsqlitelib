@@ -17,7 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.migration.MigrationSet;
+import com.fsryan.forsuredb.migration.MigrationSet;
+import com.fsryan.forsuredb.serialization.FSDbInfoGsonSerializer;
+import com.fsryan.forsuredb.serialization.FSDbInfoSerializer;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -139,8 +141,9 @@ public class MigrationSqlQueryTest {
 
     @Before
     public void setUp() {
-        MigrationSet migrationSet = new Gson().fromJson(inputMigrationJson, MigrationSet.class);
-        actualSqlOutput = new SqlGenerator().generateMigrationSql(migrationSet);
+        FSDbInfoSerializer gsonSerializer = new FSDbInfoGsonSerializer();
+        MigrationSet migrationSet = gsonSerializer.deserializeMigrationSet(inputMigrationJson);
+        actualSqlOutput = new SqlGenerator().generateMigrationSql(migrationSet, gsonSerializer);
     }
 
     @Test

@@ -1,15 +1,13 @@
 package com.fsryan.forsuredb.sqlitelib;
 
-
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.ForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.ForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Set;
 
 import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.TYPES_REQUIRING_TABLE_RECREATION;
 
@@ -23,18 +21,18 @@ import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.TYPES_REQUIRING_TABLE_
 
     @Override
     public int compare(Migration m1, Migration m2) {
-        final boolean m1RequiresTableRecreation = TYPES_REQUIRING_TABLE_RECREATION.contains(m1.getType());
-        final boolean m2RequiresTableRecreation = TYPES_REQUIRING_TABLE_RECREATION.contains(m2.getType());
+        final boolean m1RequiresTableRecreation = TYPES_REQUIRING_TABLE_RECREATION.contains(m1.type());
+        final boolean m2RequiresTableRecreation = TYPES_REQUIRING_TABLE_RECREATION.contains(m2.type());
         return m1RequiresTableRecreation && m2RequiresTableRecreation
                 ? compareMigrationsRequiringMigration(m1, m2)
                 : m1RequiresTableRecreation ? -1 : m2RequiresTableRecreation ? 1 : 0;
     }
 
     private int compareMigrationsRequiringMigration(Migration m1, Migration m2) {
-        if (m1.getType() == Migration.Type.CREATE_TABLE ^ m2.getType() == Migration.Type.CREATE_TABLE) {
-            return m1.getType() == Migration.Type.CREATE_TABLE ? -1 : 1;
+        if (m1.type() == Migration.Type.CREATE_TABLE ^ m2.type() == Migration.Type.CREATE_TABLE) {
+            return m1.type() == Migration.Type.CREATE_TABLE ? -1 : 1;
         }
-        if (m1.getType() != Migration.Type.CREATE_TABLE) {
+        if (m1.type() != Migration.Type.CREATE_TABLE) {
             return 0;   // <-- neither is a create table migration
         }
 
@@ -48,19 +46,19 @@ import static com.fsryan.forsuredb.sqlitelib.SqlGenerator.TYPES_REQUIRING_TABLE_
     }
 
     private boolean firstDependsUponSecond(Migration first, Migration second) {
-        final TableInfo firstTable = targetSchema.get(first.getTableName());
-        if (firstTable.getForeignKeys() == null) {
+        final TableInfo firstTable = targetSchema.get(first.tableName());
+        if (firstTable.foreignKeys() == null) {
             for (ColumnInfo fkColumn : firstTable.getForeignKeyColumns()) {
-                final ForeignKeyInfo fk = fkColumn.getForeignKeyInfo();
-                if (fk != null && fk.getTableName().equals(second.getTableName())) {
+                final ForeignKeyInfo fk = fkColumn.foreignKeyInfo();
+                if (fk != null && fk.tableName().equals(second.tableName())) {
                     return true;
                 }
             }
             return false;
         }
 
-        for (TableForeignKeyInfo firstTableForeignKey : firstTable.getForeignKeys()) {
-            if (firstTableForeignKey.getForeignTableName().equals(second.getTableName())) {
+        for (TableForeignKeyInfo firstTableForeignKey : firstTable.foreignKeys()) {
+            if (firstTableForeignKey.foreignTableName().equals(second.tableName())) {
                 return true;   // <-- m1Table is dependent upon m2Table
             }
         }

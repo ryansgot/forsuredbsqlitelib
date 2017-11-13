@@ -17,8 +17,8 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.LinkedList;
 import java.util.List;

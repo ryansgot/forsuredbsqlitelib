@@ -17,9 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class AddColumnGenerator extends QueryGenerator {
                 + " ADD COLUMN " + column.getColumnName()
                 + " " + TypeTranslator.from(column.getQualifiedType()).getSqlString()
                 + (column.hasDefaultValue() ? " DEFAULT" + getDefaultValueFrom(column) : "") + ";");
-        if (column.isIndex()) {
+        if (column.index()) {
             queries.addAll(new AddIndexGenerator(getTableName(), column).generate());
         }
         return queries;
@@ -48,8 +48,8 @@ public class AddColumnGenerator extends QueryGenerator {
 
     private String getDefaultValueFrom(ColumnInfo column) {
         TypeTranslator tt = TypeTranslator.from(column.getQualifiedType());
-        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.getDefaultValue())) {
-            return " '" + column.getDefaultValue() + "'";
+        if (tt != TypeTranslator.DATE || !"CURRENT_TIMESTAMP".equals(column.defaultValue())) {
+            return " '" + column.defaultValue() + "'";
         }
         return "(" + SqlGenerator.CURRENT_UTC_TIME + ")";
     }

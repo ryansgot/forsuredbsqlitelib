@@ -18,9 +18,9 @@
 package com.fsryan.forsuredb.sqlitelib;
 
 import com.fsryan.forsuredb.annotations.ForeignKey;
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.ForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.ForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -71,14 +71,14 @@ public class TestData {
     public static Map<String, TableInfo> tableMapOf(TableInfo... tables) {
         Map<String, TableInfo> ret = new HashMap<>();
         for (TableInfo table : tables) {
-            ret.put(table.getTableName(), table);
+            ret.put(table.tableName(), table);
         }
         return ret;
     }
 
     // Convenience methods for making data to go into the tests
-    public static TableInfo.Builder table() {
-        return TableInfo.builder().tableName(TABLE_NAME);
+    public static TableInfo.BuilderCompat table() {
+        return TableInfo.builder().tableName(TABLE_NAME).qualifiedClassName(TestData.class.getName());
     }
 
     public static ColumnInfo idCol() {
@@ -138,36 +138,38 @@ public class TestData {
     }
 
     public static ForeignKeyInfo.Builder cascadeFKI(String foreignKeyTableName) {
-        return ForeignKeyInfo.builder().updateAction(ForeignKey.ChangeAction.CASCADE)
-                .deleteAction(ForeignKey.ChangeAction.CASCADE)
-                .columnName("_id")
-                .tableName(foreignKeyTableName);
+        return fki(foreignKeyTableName)
+                .updateAction(ForeignKey.ChangeAction.CASCADE.toString())
+                .deleteAction(ForeignKey.ChangeAction.CASCADE.toString());
     }
 
     public static ForeignKeyInfo.Builder noActionFKI(String foreignKeyTableName) {
-        return ForeignKeyInfo.builder().updateAction(ForeignKey.ChangeAction.NO_ACTION)
-                .deleteAction(ForeignKey.ChangeAction.NO_ACTION)
-                .columnName("_id")
-                .tableName(foreignKeyTableName);
+        return fki(foreignKeyTableName)
+                .updateAction(ForeignKey.ChangeAction.NO_ACTION.toString())
+                .deleteAction(ForeignKey.ChangeAction.NO_ACTION.toString());
     }
 
     public static ForeignKeyInfo.Builder setNullFKI(String foreignKeyTableName) {
-        return ForeignKeyInfo.builder().updateAction(ForeignKey.ChangeAction.SET_NULL)
-                .deleteAction(ForeignKey.ChangeAction.SET_NULL)
-                .columnName("_id")
-                .tableName(foreignKeyTableName);
+        return fki(foreignKeyTableName)
+                .updateAction(ForeignKey.ChangeAction.SET_NULL.toString())
+                .deleteAction(ForeignKey.ChangeAction.SET_NULL.toString());
     }
 
     public static ForeignKeyInfo.Builder setDefaultFKI(String foreignKeyTableName) {
-        return ForeignKeyInfo.builder().updateAction(ForeignKey.ChangeAction.SET_DEFAULT)
-                .deleteAction(ForeignKey.ChangeAction.SET_DEFAULT)
-                .columnName("_id")
-                .tableName(foreignKeyTableName);
+        return fki(foreignKeyTableName)
+                .updateAction(ForeignKey.ChangeAction.SET_DEFAULT.toString())
+                .deleteAction(ForeignKey.ChangeAction.SET_DEFAULT.toString());
     }
 
     public static ForeignKeyInfo.Builder restrictFKI(String foreignKeyTableName) {
-        return ForeignKeyInfo.builder().updateAction(ForeignKey.ChangeAction.RESTRICT)
-                .deleteAction(ForeignKey.ChangeAction.RESTRICT)
+        return fki(foreignKeyTableName)
+                .updateAction(ForeignKey.ChangeAction.RESTRICT.toString())
+                .deleteAction(ForeignKey.ChangeAction.RESTRICT.toString());
+    }
+
+    private static ForeignKeyInfo.Builder fki(String foreignKeyTableName) {
+        return ForeignKeyInfo.builder()
+                .apiClassName(TestData.class.getName())
                 .columnName("_id")
                 .tableName(foreignKeyTableName);
     }
@@ -175,10 +177,14 @@ public class TestData {
     // Helpers for covenience methods
 
     private static ColumnInfo.Builder columnFrom(TypeTranslator tt) {
-        return ColumnInfo.builder().columnName(nameFrom(tt)).qualifiedType(tt.getQualifiedType());
+        return ColumnInfo.builder().columnName(nameFrom(tt)).qualifiedType(tt.getQualifiedType()).methodName(methodNameFrom(tt));
     }
 
     private static String nameFrom(TypeTranslator tt) {
         return tt.name().toLowerCase() + "_column";
+    }
+
+    private static String methodNameFrom(TypeTranslator tt) {
+        return tt.name().toLowerCase() + "Column";
     }
 }

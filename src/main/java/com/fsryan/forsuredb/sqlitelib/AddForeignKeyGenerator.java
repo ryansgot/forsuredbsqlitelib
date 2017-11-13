@@ -17,10 +17,10 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.ColumnInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
-import com.fsryan.forsuredb.api.migration.Migration;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.ColumnInfo;
+import com.fsryan.forsuredb.info.TableInfo;
+import com.fsryan.forsuredb.migration.Migration;
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
      * @param newForeignKeyColumns a list of all new foreign key columns to add
      */
     public AddForeignKeyGenerator(TableInfo table, List<ColumnInfo> newForeignKeyColumns, Map<String, TableInfo> targetSchema) {
-        super(table.getTableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
+        super(table.tableName(), Migration.Type.ADD_FOREIGN_KEY_REFERENCE);
         this.table = table;
         this.newForeignKeyColumns = newForeignKeyColumns;
         this.targetSchema = targetSchema;
@@ -107,7 +107,7 @@ public class AddForeignKeyGenerator extends QueryGenerator {
     private List<String> allColumnAdditionQueries() {
         List<String> retList = new LinkedList<>();
         for (ColumnInfo columnInfo : table.getNonForeignKeyColumns()) {
-            if (DEFAULT_COLUMN_MAP.containsKey(columnInfo.getColumnName()) || columnInfo.isUnique()) {
+            if (DEFAULT_COLUMN_MAP.containsKey(columnInfo.getColumnName()) || columnInfo.unique()) {
                 continue;   // <-- these columns were added in the CREATE TABLE query
             }
 
@@ -158,10 +158,10 @@ public class AddForeignKeyGenerator extends QueryGenerator {
 
     private void addForeignKeyDefinitionToBuffer(StringBuffer buf, ColumnInfo column) {
         buf.append(", FOREIGN KEY(").append(column.getColumnName())
-                .append(") REFERENCES ").append(column.getForeignKeyInfo().getTableName())
-                .append("(").append(column.getForeignKeyInfo().getColumnName())
+                .append(") REFERENCES ").append(column.foreignKeyInfo().tableName())
+                .append("(").append(column.foreignKeyInfo().columnName())
                 .append(")")
-                .append(" ON UPDATE ").append(column.getForeignKeyInfo().getUpdateAction().toString())
-                .append(" ON DELETE ").append(column.getForeignKeyInfo().getDeleteAction().toString());
+                .append(" ON UPDATE ").append(column.foreignKeyInfo().updateAction())
+                .append(" ON DELETE ").append(column.foreignKeyInfo().deleteAction());
     }
 }

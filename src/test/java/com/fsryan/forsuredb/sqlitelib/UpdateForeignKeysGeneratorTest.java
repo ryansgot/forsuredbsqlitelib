@@ -17,9 +17,9 @@
  */
 package com.fsryan.forsuredb.sqlitelib;
 
-import com.fsryan.forsuredb.api.info.TableForeignKeyInfo;
-import com.fsryan.forsuredb.api.info.TableInfo;
 import com.fsryan.forsuredb.api.migration.QueryGenerator;
+import com.fsryan.forsuredb.info.TableForeignKeyInfo;
+import com.fsryan.forsuredb.info.TableInfo;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static com.fsryan.forsuredb.sqlitelib.CollectionUtil.stringMapOf;
 import static com.fsryan.forsuredb.sqlitelib.TestData.*;
 
 @RunWith(Parameterized.class)
@@ -71,12 +72,13 @@ public class UpdateForeignKeysGeneratorTest extends BaseSQLiteGeneratorTest {
                                         .build(),
                                 table().tableName("referencing_table")
                                         .foreignKeys(setOf(
-                                                new TableForeignKeyInfo.Builder()
+                                                TableForeignKeyInfo.builder()
                                                         .foreignTableName("referenced_table")
                                                         .foreignTableApiClassName(UpdateForeignKeysGeneratorTest.class.getName())
-                                                        .mapLocalToForeignColumn("referencing_int_column", "referenced_int_column")
-                                                        .mapLocalToForeignColumn("referencing_long_column", "referenced_long_column")
-                                                        .updateChangeAction("CASCADE")
+                                                        .localToForeignColumnMap(stringMapOf(
+                                                                "referencing_int_column", "referenced_int_column",
+                                                                "referencing_long_column", "referenced_long_column"
+                                                        )).updateChangeAction("CASCADE")
                                                         .deleteChangeAction("CASCADE")
                                                         .build())
                                         )
